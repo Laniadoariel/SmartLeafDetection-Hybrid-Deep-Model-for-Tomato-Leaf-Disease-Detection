@@ -1,0 +1,29 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green-50: #f0fdf4; --green-100: #dcfce7; --green-200: #bbf7d0;
+  --green-500: #22c55e; --green-600: #16a34a; --green-700: #15803d;
+  --red-500: #ef4444; --red-600: #dc2626;
+  --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
+  --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
+  --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937;
+  --gray-900: #111827;
+  --radius: 12px; --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -4px rgba(0,0,0,.1);
+}
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--gray-50); color: var(--gray-800);
+  line-height: 1.6; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--green-600); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button {
+  cursor: pointer; border: none; border-radius: 8px;
+  font-family: inherit; font-weight: 500; transition: all .15s;
+}
+input {
+  border: 1px solid var(--gray-300); border-radius: 8px;
+  padding: 10px 14px; font-family: inherit; font-size: 14px;
+  width: 100%; outline: none; transition: border-color .15s;
+}
+input:focus { border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(34,197,94,.15); }

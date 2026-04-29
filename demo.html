@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartLeafDetection — Pipeline Demo</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --accent: #4ade80;
+    --accent2: #60a5fa;
+    --accent3: #f472b6;
+    --accent4: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --danger: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  h1 { font-size: 2.2rem; text-align: center; margin-bottom: 0.3rem; }
+  h1 span { color: var(--accent); }
+  .subtitle { text-align: center; color: var(--muted); margin-bottom: 2.5rem; font-size: 1.05rem; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🌿 <span>SmartLeafDetection</span></h1>
+  <p class="subtitle">Drone-Video Analysis Pipeline for Tomato Leaf Disease Detection</p>
+
+  <!-- ============================================================ -->
+  <!-- PIPELINE OVERVIEW -->
+  <!-- ============================================================ -->
+  <style>
+    .pipeline-flow {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+      margin-bottom: 3rem;
+    }
+    .stage {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 0.6rem 1rem; text-align: center;
+      font-size: 0.82rem; min-width: 120px; position: relative;
+    }
+    .stage .num { color: var(--accent); font-weight: 700; display: block; font-size: 0.7rem; }
+    .stage .name { font-weight: 600; }
+    .arrow { color: var(--muted); font-size: 1.4rem; display: flex; align-items: center; }
+  </style>
+
+  <div class="pipeline-flow">
+    <div class="stage"><span class="num">1</span><span class="name">Frame Extraction</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">2</span><span class="name">Plant Detection</span><br><small style="color:var(--muted)">YOLOv11</small></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">3</span><span class="name">Plant Tracking</span><br><small style="color:var(--muted)">ByteTrack IOU</small></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">4</span><span class="name">ROI Crop</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">5</span><span class="name">Leaf Detection</span><br><small style="color:var(--muted)">YOLOv11</small></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">6</span><span class="name">Leaf Tracking</span><br><small style="color:var(--muted)">ByteTrack IOU</small></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">7</span><span class="name">Normalize</span><br><small style="color:var(--muted)">224×224</small></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">8</span><span class="name">Classify</span><br><small style="color:var(--muted)">ResNet50</small></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">9</span><span class="name">Temporal Agg.</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">10</span><span class="name">Plant Status</span></div>
+    <div class="arrow">→</div>
+    <div class="stage"><span class="num">11</span><span class="name">GPS + Export</span></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SAMPLE FRAMES SECTION -->
+  <!-- ============================================================ -->
+  <style>
+    .section { margin-bottom: 3rem; }
+    .section-title {
+      font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem;
+      border-left: 4px solid var(--accent); padding-left: 0.8rem;
+    }
+    .frames-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.2rem;
+    }
+    .frame-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+    }
+    .frame-card img {
+      width: 100%; height: auto; display: block;
+    }
+    .frame-card .caption {
+      padding: 0.8rem 1rem; font-size: 0.85rem;
+    }
+    .frame-card .caption strong { color: var(--accent2); }
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 4px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .badge-annotated { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .badge-original { background: rgba(74,222,128,0.2); color: #4ade80; }
+    .badge-leaf { background: rgba(96,165,250,0.2); color: #60a5fa; }
+  </style>
+
+  <div class="section">
+    <div class="section-title">Sample Drone Frames</div>
+    <p style="color:var(--muted); margin-bottom:1rem;">
+      3 annotated frames with red bounding boxes marking individual leaves, plus the original clean frames.
+    </p>
+    <div class="frames-grid">
+      <div class="frame-card">
+        <img src="1.jpeg" alt="Frame 1 — Annotated">
+        <div class="caption">
+          <span class="badge badge-annotated">Annotated</span>
+          <strong>Frame 1</strong> — 652×706 — 2 leaf boxes detected
+        </div>
+      </div>
+      <div class="frame-card">
+        <img src="1_original.jpeg" alt="Frame 1 — Original">
+        <div class="caption">
+          <span class="badge badge-original">Original</span>
+          <strong>Frame 1</strong> — Clean (no markings)
+        </div>
+      </div>
+      <div class="frame-card">
+        <img src="2.jpeg" alt="Frame 2 — Annotated">
+        <div class="caption">
+          <span class="badge badge-annotated">Annotated</span>
+          <strong>Frame 2</strong> — 1320×735 — 4 leaf boxes detected
+        </div>
+      </div>
+      <div class="frame-card">
+        <img src="2_original.jpeg" alt="Frame 2 — Original">
+        <div class="caption">
+          <span class="badge badge-original">Original</span>
+          <strong>Frame 2</strong> — Clean (no markings)
+        </div>
+      </div>
+      <div class="frame-card">
+        <img src="3.jpeg" alt="Frame 3 — Annotated">
+        <div class="caption">
+          <span class="badge badge-annotated">Annotated</span>
+          <strong>Frame 3</strong> — 1320×732 — 2 leaf boxes detected (noise filtered)
+        </div>
+      </div>
+      <div class="frame-card">
+        <img src="3_original.jpeg" alt="Frame 3 — Original">
+        <div class="caption">
+          <span class="badge badge-original">Original</span>
+          <strong>Frame 3</strong> — Clean (no markings)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- STEP-BY-STEP GUIDE -->
+  <!-- ============================================================ -->
+  <style>
+    .step {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem; margin-bottom: 1.2rem;
+      position: relative;
+    }
+    .step-num {
+      position: absolute; top: -12px; left: 20px;
+      background: var(--accent); color: var(--bg);
+      font-weight: 800; font-size: 0.8rem;
+      padding: 0.2rem 0.7rem; border-radius: 20px;
+    }
+    .step h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+    .step p { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.6rem; }
+    pre {
+      background: #0d0f14; border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem; overflow-x: auto;
+      font-size: 0.82rem; line-height: 1.5; color: #c9d1d9;
+    }
+    code { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; }
+    .cmd { color: var(--accent); }
+    .comment { color: #6a737d; }
+    .flag { color: var(--accent4); }
+    .note {
+      background: rgba(96,165,250,0.1); border-left: 3px solid var(--accent2);
+      padding: 0.7rem 1rem; border-radius: 0 8px 8px 0;
+      font-size: 0.85rem; margin-top: 0.8rem;
+    }
+    .warn {
+      background: rgba(251,191,36,0.1); border-left: 3px solid var(--accent4);
+      padding: 0.7rem 1rem; border-radius: 0 8px 8px 0;
+      font-size: 0.85rem; margin-top: 0.8rem;
+    }
+  </style>
+
+  <div class="section">
+    <div class="section-title">Step-by-Step Guide</div>
+
+    <!-- STEP 0 -->
+    <div class="step">
+      <div class="step-num">0</div>
+      <h3>Prerequisites & Setup</h3>
+      <p>Create a virtual environment and install dependencies.</p>
+      <pre><code><span class="comment"># Create venv (if not already done)</span>
+<span class="cmd">python3</span> -m venv venv
+<span class="cmd">source</span> venv/bin/activate
+
+<span class="comment"># Install all dependencies</span>
+<span class="cmd">pip</span> install -r requirements.txt</code></pre>
+      <div class="note">
+        <strong>requirements.txt</strong> includes: ultralytics, opencv-python, torch, torchvision, numpy, hypothesis, pytest, pyyaml
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Run Tests — Verify Everything Works</h3>
+      <p>Run the full test suite to confirm all 65 tests pass.</p>
+      <pre><code><span class="cmd">source</span> venv/bin/activate
+<span class="cmd">python3</span> -m pytest tests/ -v --tb=short</code></pre>
+      <p>Expected output: <code style="color:var(--accent)">65 passed</code></p>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Extract Leaf Annotations from Red-Marked Frames</h3>
+      <p>Detect the red bounding boxes on annotated images, extract YOLO-format labels, and copy the clean originals into a training dataset.</p>
+      <pre><code><span class="cmd">python</span> training/extract_annotations.py \
+    <span class="flag">--annotated</span> 1.jpeg 2.jpeg 3.jpeg \
+    <span class="flag">--originals</span> 1_original.jpeg 2_original.jpeg 3_original.jpeg \
+    <span class="flag">--output-dir</span> training/dataset \
+    <span class="flag">--min-area</span> 1000</code></pre>
+      <p>This creates:</p>
+      <pre><code>training/dataset/
+  ├── images/          <span class="comment"># Clean original frames</span>
+  │   ├── 1.jpeg
+  │   ├── 2.jpeg
+  │   └── 3.jpeg
+  ├── labels/          <span class="comment"># YOLO-format .txt annotations</span>
+  │   ├── 1.txt
+  │   ├── 2.txt
+  │   └── 3.txt
+  ├── visualizations/  <span class="comment"># Green bbox overlays for verification</span>
+  │   ├── 1_viz.jpeg
+  │   ├── 2_viz.jpeg
+  │   └── 3_viz.jpeg
+  └── data.yaml        <span class="comment"># YOLO dataset config</span></code></pre>
+      <div class="warn">
+        <strong>Check the visualizations!</strong> Open <code>training/dataset/visualizations/</code> to verify the green boxes match the original red annotations.
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Train YOLOv11 for Leaf Detection</h3>
+      <p>Fine-tune a pretrained YOLOv11-nano model on the extracted leaf annotations.</p>
+      <pre><code><span class="cmd">python</span> training/train_yolo_leaves.py \
+    <span class="flag">--data</span> training/dataset/data.yaml \
+    <span class="flag">--model</span> yolo11n.pt \
+    <span class="flag">--epochs</span> 50 \
+    <span class="flag">--imgsz</span> 640 \
+    <span class="flag">--batch</span> 4</code></pre>
+      <p>Output: <code>yolo11_leaves.pt</code> in the project root.</p>
+      <div class="warn">
+        <strong>3 images is extremely small</strong> — this is proof-of-concept only. For production, you'd need 500+ annotated images. The model will overfit but demonstrates the training pipeline works.
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Train ResNet50 for Disease Classification</h3>
+      <p>Fine-tune ResNet50 on the PlantVillage dataset (10 tomato disease classes).</p>
+      <pre><code><span class="comment"># Download PlantVillage dataset from Kaggle + train</span>
+<span class="cmd">python</span> training/train_resnet50.py \
+    <span class="flag">--download</span> \
+    <span class="flag">--data-dir</span> training/plantvillage \
+    <span class="flag">--epochs</span> 25 \
+    <span class="flag">--batch-size</span> 32 \
+    <span class="flag">--device</span> cpu</code></pre>
+      <p>Output: <code>resnet50_tomato.pt</code> in the project root.</p>
+      <div class="note">
+        <strong>Kaggle API required</strong> for auto-download. Install with <code>pip install kaggle</code> and set up <code>~/.kaggle/kaggle.json</code>. Or download manually from <a href="https://www.kaggle.com/datasets/emmarex/plantdisease" style="color:var(--accent2)">kaggle.com/datasets/emmarex/plantdisease</a>.
+      </div>
+      <p style="margin-top:0.5rem;">The 10 disease classes:</p>
+      <pre><code>Bacterial_spot, Early_blight, Late_blight, Leaf_Mold,
+Septoria_leaf_spot, Spider_mites, Target_Spot,
+Tomato_Yellow_Leaf_Curl_Virus, Tomato_mosaic_virus, healthy</code></pre>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step">
+      <div class="step-num">5</div>
+      <h3>(Optional) Train YOLOv11 for Plant Detection</h3>
+      <p>If you have plant-level annotations, train a separate YOLO model for plant detection. This step requires your own annotated dataset with whole-plant bounding boxes.</p>
+      <pre><code><span class="comment"># Same workflow as leaf training, but with plant annotations</span>
+<span class="comment"># Output: yolo11_plants.pt</span></code></pre>
+      <div class="note">
+        For now, the leaf detection model can serve double duty if your drone frames show individual plants clearly.
+      </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step">
+      <div class="step-num">6</div>
+      <h3>Run the Full Pipeline on a Drone Video</h3>
+      <p>Once you have trained weights, run the pipeline on a real drone video.</p>
+      <pre><code><span class="comment"># Create a config file</span>
+<span class="cmd">cat</span> > pipeline_config.yaml << 'EOF'
+video_path: "drone_flight.mp4"
+plant_weights_path: "yolo11_plants.pt"
+leaf_weights_path: "yolo11_leaves.pt"
+classifier_weights_path: "resnet50_tomato.pt"
+device: "cpu"
+extraction_rate: 3
+aggregation_window: 30
+dual_threshold_enabled: true
+output_format: "json"
+output_path: "disease_report.json"
+EOF</code></pre>
+      <pre><code><span class="comment"># Run the pipeline via Python</span>
+<span class="cmd">python3</span> -c "
+from smart_leaf_detection.config import PipelineConfig
+from smart_leaf_detection.pipeline import Pipeline
+
+config = PipelineConfig.from_file('pipeline_config.yaml')
+pipeline = Pipeline(config)
+records = pipeline.run(
+    video_path=config.video_path,
+    srt_path='drone_flight.srt'  # optional GPS
+)
+print(f'Found {len(records)} diseased plants')
+"</code></pre>
+      <p>Output: <code>disease_report.json</code> with one record per diseased plant.</p>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="step">
+      <div class="step-num">7</div>
+      <h3>View the Disease Report</h3>
+      <p>The pipeline outputs a JSON (or CSV) report with one entry per diseased plant.</p>
+      <pre><code><span class="comment"># Example disease_report.json output:</span>
+[
+  {
+    "flight_id": "drone_flight.mp4",
+    "plant_id": 3,
+    "gps": {
+      "latitude": "32.070100000000",
+      "longitude": "34.780200000000",
+      "altitude": "52.000000000000"
+    },
+    "disease_labels": ["Early_blight", "Late_blight"],
+    "evidence_metrics": {
+      "Early_blight": 0.87,
+      "Late_blight": 0.62,
+      "leaf_count": 5.0,
+      "diseased_leaf_count": 3.0
+    }
+  }
+]</code></pre>
+    </div>
+
+  </div> <!-- end section -->
+
+  <!-- ============================================================ -->
+  <!-- ARCHITECTURE DEEP DIVE -->
+  <!-- ============================================================ -->
+  <style>
+    .arch-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.2rem; margin-bottom: 2rem;
+    }
+    .arch-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.2rem;
+    }
+    .arch-card h4 {
+      font-size: 1rem; margin-bottom: 0.4rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .arch-card h4 .icon { font-size: 1.3rem; }
+    .arch-card p { color: var(--muted); font-size: 0.85rem; }
+    .arch-card .tech {
+      margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem;
+    }
+    .tech-badge {
+      background: rgba(74,222,128,0.12); color: var(--accent);
+      padding: 0.15rem 0.5rem; border-radius: 4px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .file-ref {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      color: var(--accent2); display: block; margin-top: 0.4rem;
+    }
+  </style>
+
+  <div class="section">
+    <div class="section-title">Architecture — Module Breakdown</div>
+    <div class="arch-grid">
+
+      <div class="arch-card">
+        <h4><span class="icon">🎬</span> Frame Extractor</h4>
+        <p>Reads drone video and yields BGR frames. Supports every-N-frames or target-FPS extraction modes. Streaming — no disk writes.</p>
+        <div class="tech"><span class="tech-badge">OpenCV</span></div>
+        <span class="file-ref">smart_leaf_detection/frame_extractor.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">🌱</span> Plant Detector</h4>
+        <p>Detects tomato plants in full video frames using YOLOv11. Returns bounding boxes with confidence scores.</p>
+        <div class="tech"><span class="tech-badge">YOLOv11</span><span class="tech-badge">Ultralytics</span></div>
+        <span class="file-ref">smart_leaf_detection/plant_detector.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">🔗</span> Plant Tracker</h4>
+        <p>ByteTrack-style IOU tracker. Two-stage association (high + low confidence) assigns stable PlantIDs across frames.</p>
+        <div class="tech"><span class="tech-badge">ByteTrack</span><span class="tech-badge">IOU Matching</span></div>
+        <span class="file-ref">smart_leaf_detection/plant_tracker.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">✂️</span> ROI Cropper</h4>
+        <p>Crops plant/leaf regions with configurable padding. Boundary-clamped to prevent out-of-frame access.</p>
+        <div class="tech"><span class="tech-badge">NumPy</span></div>
+        <span class="file-ref">smart_leaf_detection/roi_cropper.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">🍃</span> Leaf Detector</h4>
+        <p>Detects individual leaves within plant ROIs using a second YOLOv11 model. Coordinates are relative to the plant crop.</p>
+        <div class="tech"><span class="tech-badge">YOLOv11</span><span class="tech-badge">Ultralytics</span></div>
+        <span class="file-ref">smart_leaf_detection/leaf_detector.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">🔗</span> Leaf Tracker</h4>
+        <p>Per-plant ByteTrack IOU tracker. Assigns stable LeafIDs scoped to each PlantID.</p>
+        <div class="tech"><span class="tech-badge">ByteTrack</span><span class="tech-badge">IOU Matching</span></div>
+        <span class="file-ref">smart_leaf_detection/leaf_tracker.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">📐</span> Leaf Normalizer</h4>
+        <p>Resizes leaf ROIs to 224×224, converts BGR→RGB, applies ImageNet mean/std normalization. Outputs a (1,3,224,224) tensor.</p>
+        <div class="tech"><span class="tech-badge">OpenCV</span><span class="tech-badge">PyTorch</span></div>
+        <span class="file-ref">smart_leaf_detection/leaf_normalizer.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">🔬</span> Disease Classifier</h4>
+        <p>ResNet50 with custom FC head. Classifies normalized leaf tensors into 10 tomato disease classes via softmax.</p>
+        <div class="tech"><span class="tech-badge">ResNet50</span><span class="tech-badge">torchvision</span></div>
+        <span class="file-ref">smart_leaf_detection/disease_classifier.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">⏱️</span> Temporal Aggregator</h4>
+        <p>Sliding window buffer per LeafID. Dual-threshold gating: mean probability + majority vote ratio for confident labels.</p>
+        <div class="tech"><span class="tech-badge">Sliding Window</span><span class="tech-badge">Dual Threshold</span></div>
+        <span class="file-ref">smart_leaf_detection/temporal_aggregator.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">🏥</span> Plant Status Engine</h4>
+        <p>Merges leaf-level labels into plant-level status. Reports top-K diseases ranked by accumulated confidence.</p>
+        <div class="tech"><span class="tech-badge">Top-K Ranking</span></div>
+        <span class="file-ref">smart_leaf_detection/plant_status_engine.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">📍</span> GPS Associator</h4>
+        <p>Parses DJI-style SRT telemetry files. Maps subtitle blocks to frame indices for approximate plant geolocation (±2-5m).</p>
+        <div class="tech"><span class="tech-badge">SRT Parser</span><span class="tech-badge">Regex</span></div>
+        <span class="file-ref">smart_leaf_detection/gps_associator.py</span>
+      </div>
+
+      <div class="arch-card">
+        <h4><span class="icon">📊</span> Report Exporter</h4>
+        <p>Exports disease records as JSON or CSV. One record per diseased plant with GPS, disease labels, and evidence metrics.</p>
+        <div class="tech"><span class="tech-badge">JSON</span><span class="tech-badge">CSV</span></div>
+        <span class="file-ref">smart_leaf_detection/report_exporter.py</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PROJECT STRUCTURE -->
+  <!-- ============================================================ -->
+  <div class="section">
+    <div class="section-title">Project Structure</div>
+    <pre><code>Noy_project/
+├── smart_leaf_detection/          <span class="comment"># Core pipeline package</span>
+│   ├── __init__.py
+│   ├── config.py                  <span class="comment"># PipelineConfig with validation + YAML/JSON loading</span>
+│   ├── errors.py                  <span class="comment"># Error hierarchy (PipelineError, ModelLoadError, ...)</span>
+│   ├── models.py                  <span class="comment"># Data models (Detection, TrackedDetection, DiseaseRecord, ...)</span>
+│   ├── frame_extractor.py         <span class="comment"># Video → frames (OpenCV)</span>
+│   ├── plant_detector.py          <span class="comment"># YOLOv11 plant detection</span>
+│   ├── plant_tracker.py           <span class="comment"># ByteTrack IOU plant tracker</span>
+│   ├── roi_cropper.py             <span class="comment"># Padded ROI cropping with boundary clamping</span>
+│   ├── leaf_detector.py           <span class="comment"># YOLOv11 leaf detection within plant ROIs</span>
+│   ├── leaf_tracker.py            <span class="comment"># ByteTrack IOU leaf tracker (per-plant)</span>
+│   ├── leaf_normalizer.py         <span class="comment"># 224×224 ImageNet normalization</span>
+│   ├── disease_classifier.py      <span class="comment"># ResNet50 disease classification</span>
+│   ├── temporal_aggregator.py     <span class="comment"># Sliding window + dual-threshold aggregation</span>
+│   ├── plant_status_engine.py     <span class="comment"># Leaf→Plant status merging + top-K diseases</span>
+│   ├── gps_associator.py          <span class="comment"># DJI SRT telemetry parser</span>
+│   ├── report_exporter.py         <span class="comment"># JSON/CSV disease report export</span>
+│   └── pipeline.py                <span class="comment"># Pipeline orchestrator (wires everything together)</span>
+│
+├── training/                      <span class="comment"># Training scripts</span>
+│   ├── extract_annotations.py     <span class="comment"># Red bbox → YOLO labels extractor</span>
+│   ├── train_yolo_leaves.py       <span class="comment"># YOLOv11 fine-tuning for leaf detection</span>
+│   └── train_resnet50.py          <span class="comment"># ResNet50 fine-tuning on PlantVillage</span>
+│
+├── tests/                         <span class="comment"># Test suite (65 tests)</span>
+│   ├── test_pipeline_config.py    <span class="comment"># Config validation + file loading tests</span>
+│   ├── test_leaf_detector.py      <span class="comment"># LeafDetector unit tests</span>
+│   └── test_end_to_end.py         <span class="comment"># Component unit tests + full pipeline integration</span>
+│
+├── 1.jpeg, 2.jpeg, 3.jpeg        <span class="comment"># Annotated drone frames (red leaf boxes)</span>
+├── 1_original.jpeg, ...           <span class="comment"># Original clean frames</span>
+├── requirements.txt               <span class="comment"># Python dependencies</span>
+└── demo.html                      <span class="comment"># This file</span></code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TRAINING PIPELINE DIAGRAM -->
+  <!-- ============================================================ -->
+  <style>
+    .training-flow {
+      display: flex; flex-direction: column; gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .train-track {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.2rem;
+    }
+    .train-track h4 {
+      font-size: 1rem; margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .train-steps {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;
+    }
+    .train-box {
+      background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.3);
+      border-radius: 8px; padding: 0.5rem 0.8rem; font-size: 0.82rem;
+      text-align: center;
+    }
+    .train-box small { display: block; color: var(--muted); font-size: 0.72rem; }
+    .train-arrow { color: var(--accent); font-size: 1.2rem; }
+
+    .track-b .train-box {
+      background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.3);
+    }
+  </style>
+
+  <div class="section">
+    <div class="section-title">Training Pipelines</div>
+
+    <div class="training-flow">
+      <div class="train-track">
+        <h4>🍃 Track A — Leaf Detection (YOLOv11)</h4>
+        <div class="train-steps">
+          <div class="train-box">Annotated Frames<small>Red bbox images</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box">extract_annotations.py<small>Red pixel → YOLO labels</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box">training/dataset/<small>images/ + labels/ + data.yaml</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box">train_yolo_leaves.py<small>Fine-tune yolo11n.pt</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box" style="border-color:var(--accent);font-weight:700;">yolo11_leaves.pt</div>
+        </div>
+      </div>
+
+      <div class="train-track track-b">
+        <h4>🔬 Track B — Disease Classification (ResNet50)</h4>
+        <div class="train-steps">
+          <div class="train-box">PlantVillage Dataset<small>Kaggle download</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box">10 Tomato Classes<small>~18,000 images</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box">train_resnet50.py<small>Freeze → Unfreeze backbone</small></div>
+          <div class="train-arrow">→</div>
+          <div class="train-box" style="border-color:var(--accent2);font-weight:700;">resnet50_tomato.pt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- CONFIGURATION REFERENCE -->
+  <!-- ============================================================ -->
+  <style>
+    .config-table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem;
+      margin-bottom: 1rem;
+    }
+    .config-table th {
+      text-align: left; padding: 0.6rem 0.8rem;
+      background: rgba(74,222,128,0.08); color: var(--accent);
+      border-bottom: 2px solid var(--border);
+    }
+    .config-table td {
+      padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .config-table td:first-child {
+      font-family: 'JetBrains Mono', monospace; color: var(--accent2);
+      white-space: nowrap;
+    }
+    .config-table td:last-child { color: var(--muted); }
+    .default-val { color: var(--accent4); font-family: monospace; }
+  </style>
+
+  <div class="section">
+    <div class="section-title">Configuration Reference</div>
+    <p style="color:var(--muted); margin-bottom:1rem;">
+      All parameters can be set via YAML, JSON, or Python. Load with <code>PipelineConfig.from_file("config.yaml")</code>.
+    </p>
+    <table class="config-table">
+      <thead>
+        <tr><th>Parameter</th><th>Default</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>video_path</td><td class="default-val">""</td><td>Path to drone video file</td></tr>
+        <tr><td>extraction_rate</td><td class="default-val">None</td><td>Extract every N-th frame</td></tr>
+        <tr><td>target_fps</td><td class="default-val">None</td><td>Target extraction FPS (mutually exclusive with extraction_rate)</td></tr>
+        <tr><td>plant_weights_path</td><td class="default-val">"yolo11_plants.pt"</td><td>YOLOv11 plant detection weights</td></tr>
+        <tr><td>plant_confidence_threshold</td><td class="default-val">0.25</td><td>Min confidence for plant detections</td></tr>
+        <tr><td>leaf_weights_path</td><td class="default-val">"yolo11_leaves.pt"</td><td>YOLOv11 leaf detection weights</td></tr>
+        <tr><td>leaf_confidence_threshold</td><td class="default-val">0.25</td><td>Min confidence for leaf detections</td></tr>
+        <tr><td>classifier_weights_path</td><td class="default-val">"resnet50_tomato.pt"</td><td>ResNet50 disease classifier weights (None = random)</td></tr>
+        <tr><td>class_names</td><td class="default-val">[10 classes]</td><td>Disease class names matching classifier output</td></tr>
+        <tr><td>device</td><td class="default-val">"cuda"</td><td>Inference device (auto-falls back to cpu)</td></tr>
+        <tr><td>roi_padding</td><td class="default-val">0.1</td><td>Fractional padding around ROI crops</td></tr>
+        <tr><td>aggregation_window</td><td class="default-val">30</td><td>Sliding window size for temporal aggregation [15-60]</td></tr>
+        <tr><td>aggregation_confidence_threshold</td><td class="default-val">0.6</td><td>Min mean probability for confident label</td></tr>
+        <tr><td>aggregation_majority_ratio</td><td class="default-val">0.6</td><td>Min majority vote fraction</td></tr>
+        <tr><td>dual_threshold_enabled</td><td class="default-val">true</td><td>Enable dual-threshold gating</td></tr>
+        <tr><td>top_k_diseases</td><td class="default-val">3</td><td>Max diseases reported per plant</td></tr>
+        <tr><td>output_format</td><td class="default-val">"json"</td><td>"json" or "csv"</td></tr>
+        <tr><td>output_path</td><td class="default-val">"disease_report.json"</td><td>Output report file path</td></tr>
+        <tr><td>severity_enabled</td><td class="default-val">false</td><td>Include severity score in report</td></tr>
+        <tr><td>target_processing_fps</td><td class="default-val">20.0</td><td>Target processing speed (logs warning if below)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- QUICK START SUMMARY -->
+  <!-- ============================================================ -->
+  <style>
+    .quickstart {
+      background: linear-gradient(135deg, rgba(74,222,128,0.08), rgba(96,165,250,0.08));
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; margin-bottom: 2rem;
+    }
+    .quickstart h3 { margin-bottom: 0.8rem; }
+    .quickstart pre { margin-bottom: 0; }
+  </style>
+
+  <div class="section">
+    <div class="section-title">Quick Start — Copy & Paste</div>
+    <div class="quickstart">
+      <h3>🚀 Full workflow in one go</h3>
+      <pre><code><span class="comment"># 1. Setup</span>
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+
+<span class="comment"># 2. Verify tests pass</span>
+python3 -m pytest tests/ -v --tb=short
+
+<span class="comment"># 3. Extract annotations from your red-marked frames</span>
+python training/extract_annotations.py \
+    --annotated 1.jpeg 2.jpeg 3.jpeg \
+    --originals 1_original.jpeg 2_original.jpeg 3_original.jpeg \
+    --output-dir training/dataset
+
+<span class="comment"># 4. Train leaf detector (YOLOv11)</span>
+python training/train_yolo_leaves.py \
+    --data training/dataset/data.yaml \
+    --epochs 50
+
+<span class="comment"># 5. Train disease classifier (ResNet50)</span>
+python training/train_resnet50.py \
+    --download --data-dir training/plantvillage \
+    --epochs 25 --device cpu
+
+<span class="comment"># 6. Run pipeline on a drone video</span>
+python3 -c "
+from smart_leaf_detection.config import PipelineConfig
+from smart_leaf_detection.pipeline import Pipeline
+
+config = PipelineConfig(
+    video_path='your_drone_video.mp4',
+    plant_weights_path='yolo11_plants.pt',
+    leaf_weights_path='yolo11_leaves.pt',
+    classifier_weights_path='resnet50_tomato.pt',
+    device='cpu',
+    output_path='disease_report.json',
+)
+pipeline = Pipeline(config)
+records = pipeline.run('your_drone_video.mp4', srt_path='your_video.srt')
+print(f'Detected {len(records)} diseased plants')
+for r in records:
+    print(f'  Plant {r.plant_id}: {r.disease_labels}')
+"</code></pre>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER -->
+  <!-- ============================================================ -->
+  <style>
+    .footer {
+      text-align: center; color: var(--muted); font-size: 0.8rem;
+      padding: 2rem 0; border-top: 1px solid var(--border);
+    }
+    .footer a { color: var(--accent2); text-decoration: none; }
+  </style>
+
+  <div class="footer">
+    <p>SmartLeafDetection — Drone-Video Analysis for Tomato Leaf Disease Detection</p>
+    <p>Built with Python · YOLOv11 · ResNet50 · OpenCV · PyTorch</p>
+    <p style="margin-top:0.5rem;">65 tests passing ✅ · 14 pipeline stages · 10 disease classes</p>
+  </div>
+
+</div> <!-- end container -->
+</body>
+</html>

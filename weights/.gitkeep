@@ -1,0 +1,3 @@
+# Place trained model weights here
+# best.pt — YOLOv11s trained on merged dataset (6,500+ images)
+# Download or train using: python training/train_stable.py

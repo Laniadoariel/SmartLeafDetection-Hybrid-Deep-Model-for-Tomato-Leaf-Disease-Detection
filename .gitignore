@@ -1,0 +1,67 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+*.egg
+
+# Datasets (too large for GitHub — download separately)
+datasets/
+PlantDoc.v1-resize-416x416.yolov11/
+PlantDoc.v1-resize-416x416.yolov11.zip
+task_2114473_annotations_2026_03_25_20_00_47_cvat for images 1.1/
+task_2114473_annotations_2026_03_25_20_00_47_cvat for images 1.1.zip
+
+# Training runs and model weights (too large for GitHub)
+runs/
+yolo11n.pt
+yolo11s.pt
+
+# Keep trained weights in weights/ folder
+!weights/best.pt
+
+# Training logs
+training_log.txt
+training_stable_log.txt
+
+# Generated outputs (keep test samples)
+output/1_original*.jpeg
+output/2_original*.jpeg
+output/3_original*.jpeg
+disease_report.json
+
+# Original annotated images (keep test images only)
+1.jpeg
+2.jpeg
+3.jpeg
+1_original.jpeg
+2_original.jpeg
+3_original.jpeg
+
+# Videos
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# PDFs
+*.pdf
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.kiro/
+
+# pytest
+.pytest_cache/
+
+# Web app generated files
+webapp/backend/smartleaf.db
+webapp/backend/uploads/
+webapp/backend/processing_output/
+webapp/backend/venv/
+webapp/frontend/node_modules/
+webapp/frontend/dist/

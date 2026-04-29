@@ -1,0 +1,8 @@
+ultralytics
+opencv-python
+torch
+torchvision
+numpy
+hypothesis
+pytest
+pyyaml
