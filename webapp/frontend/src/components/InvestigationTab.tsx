@@ -5,8 +5,8 @@ interface Props { flight: FlightDetail | null }
 
 const EXPLANATIONS: Record<string, string> = {
   original: 'Raw frame extracted from the uploaded drone video. Each frame captures a section of the tomato field from above.',
-  annotated: 'The YOLOv11 leaf detector locates and tracks each individual leaf (stable per-leaf IDs via ByteTrack). Every tracked leaf crop is then passed to a dedicated ResNet50 disease classifier; boxes are drawn with the predicted disease class and confidence.',
-  pipeline: 'Actual pipeline: Frame → Leaf Detection (YOLOv11) → Leaf Tracking (ByteTrack) → Leaf Crop Extraction → Normalization (224×224, ImageNet) → Disease Classification (dedicated ResNet50 classifier) → Temporal Aggregation per tracked leaf → Final disease prediction. The YOLO model only localizes/tracks leaves; the disease prediction comes from the ResNet50 classifier.',
+  annotated: 'The YOLOv11 leaf detector locates and tracks each individual leaf (stable per-leaf IDs via BoT-SORT with Global Motion Compensation). Every tracked leaf crop is then passed to a dedicated ResNet50 disease classifier; boxes are drawn with the predicted disease class and confidence.',
+  pipeline: 'Actual pipeline: Frame → Leaf Detection (YOLOv11) → Leaf Tracking (BoT-SORT + GMC) → Leaf Crop Extraction → Normalization (224×224, ImageNet) → Disease Classification (dedicated ResNet50 classifier) → Temporal Aggregation per tracked leaf → Final disease prediction. The YOLO model only localizes/tracks leaves; the disease prediction comes from the ResNet50 classifier.',
 }
 
 export default function InvestigationTab({ flight }: Props) {

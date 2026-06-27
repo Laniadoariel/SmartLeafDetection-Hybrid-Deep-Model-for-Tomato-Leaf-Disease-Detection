@@ -131,58 +131,69 @@ Open http://localhost:3000
 
 ```
 SmartLeafDetection/
-├── smart_leaf_detection/       # Core ML pipeline
-│   ├── pipeline.py             # Main orchestrator
-│   ├── frame_extractor.py      # Video → frames
-│   ├── plant_detector.py       # YOLOv11 plant detection
-│   ├── plant_tracker.py        # ByteTrack plant tracking
-│   ├── leaf_detector.py        # YOLOv11 leaf detection
-│   ├── leaf_tracker.py         # ByteTrack leaf tracking
-│   ├── roi_cropper.py          # ROI extraction with padding
-│   ├── leaf_normalizer.py      # 224×224 ImageNet normalization
-│   ├── disease_classifier.py   # ResNet50 classifier (legacy CLI helper)
-│   ├── leaf_disease_classifier.py  # dedicated image classifier (webapp inference)
-│   ├── temporal_aggregator.py  # Sliding window aggregation
-│   ├── plant_status_engine.py  # Plant health inference
-│   ├── gps_associator.py       # SRT telemetry parsing
-│   ├── report_exporter.py      # JSON/CSV export
-│   ├── config.py               # Pipeline configuration
-│   ├── models.py               # Data models
-│   └── errors.py               # Error hierarchy
+├── webapp/                     # * PRODUCTION web application
+│   ├── backend/                #   FastAPI + SQLAlchemy
+│   │   └── app/worker.py       #   * the real production pipeline (BoT-SORT + ResNet50)
+│   │   └── app/trackers/       #   botsort_gmc.yaml (default) + bytetrack.yaml (fallback)
+│   └── frontend/               #   React + TypeScript
+├── smart_leaf_detection/       # LEGACY CLI library (NOT used by the webapp)
+│   ├── pipeline.py             #   old plant-then-leaf orchestrator
+│   ├── frame_extractor.py      #   Video -> frames
+│   ├── plant_detector.py       #   (legacy) YOLOv11 plant detection
+│   ├── plant_tracker.py        #   (legacy) hand-rolled ByteTrack-style plant tracker
+│   ├── leaf_detector.py        #   YOLOv11 leaf detection
+│   ├── leaf_tracker.py         #   (legacy) hand-rolled ByteTrack-style leaf tracker
+│   ├── roi_cropper.py          #   ROI extraction with padding
+│   ├── leaf_normalizer.py      #   224x224 ImageNet normalization
+│   ├── disease_classifier.py   #   ResNet50 classifier (legacy CLI helper)
+│   ├── leaf_disease_classifier.py  # * dedicated classifier used by the webapp
+│   ├── device_utils.py         #   CUDA -> MPS -> CPU resolver (shared, used by webapp)
+│   ├── gps_associator.py       #   SRT telemetry parsing (legacy)
+│   └── config.py / models.py / errors.py
 ├── training/                   # Training scripts
-│   ├── prepare_cvat_and_train.py  # Main training (merges all datasets)
-│   ├── train_stable.py         # Crash-proof training (val=False)
-│   ├── train_resnet50.py       # ResNet50 fine-tuning (legacy)
-│   ├── train_yolo_leaves.py    # Leaf detection training
-│   ├── disease_classification/ # dedicated disease classifier pipeline
-│   │   ├── class_mapping.py            # canonical taxonomy + label mapping
-│   │   ├── build_classification_dataset.py  # crop YOLO boxes → ImageFolder
-│   │   ├── model_factory.py            # torchvision arch factory
-│   │   ├── train_classifier.py         # transfer-learning trainer
-│   │   └── evaluate_classifier.py      # test metrics + YOLO comparison
-│   └── extract_annotations.py  # CVAT annotation extraction
-├── tests/                      # Test suite
-│   ├── test_end_to_end.py      # Full pipeline integration tests
-│   ├── test_pipeline_config.py # Configuration tests
-│   └── test_leaf_detector.py   # Detector tests
-├── webapp/                     # Web application
-│   ├── backend/                # FastAPI + SQLAlchemy
-│   └── frontend/               # React + TypeScript
-├── run_on_frames.py            # CLI tool for static images
+│   ├── leaf_detection/         #   YOLOv11 leaf detector training + evaluation
+│   └── disease_classification/ #   dedicated disease classifier pipeline
+│       ├── class_mapping.py            # canonical taxonomy + label mapping
+│       ├── build_classification_dataset.py  # crop YOLO boxes -> ImageFolder
+│       ├── model_factory.py            # torchvision arch factory
+│       ├── train_classifier.py         # transfer-learning trainer (default ResNet50)
+│       ├── evaluate_classifier.py      # test metrics + YOLO comparison
+│       └── run_benchmark.py            # ResNet50 / EfficientNetV2-S / MobileNetV3 benchmark
+├── tests/                      # Test suite (covers the legacy library + config)
 ├── requirements.txt            # Python dependencies
-└── demo.html                   # Static demo page
+└── demo.html                   # (!) legacy static demo (describes the old pipeline)
 ```
+
+> `*` = production path. The `smart_leaf_detection/` package is a legacy CLI
+> library kept for reference; only `leaf_disease_classifier.py` and
+> `device_utils.py` from it are imported by the web application.
 
 ## Pipeline Flow
 
+This is the **production pipeline** that the web application actually runs
+(`webapp/backend/app/worker.py`):
+
 ```
-Drone Video → Frame Extraction → Plant Detection (YOLOv11)
-→ Plant Tracking (ByteTrack) → ROI Cropping
-→ Leaf Detection (YOLOv11) → Leaf Tracking (ByteTrack)
-→ Normalization (224×224) → Disease Classification (dedicated ResNet50 classifier)
-→ Temporal Aggregation → Plant Status Inference
-→ GPS Association → Report Export
+Drone Video
+→ Frame Extraction (FRAME_STRIDE_SEC sampling + near-duplicate skip)
+→ Frame Quality Selection (sharpest, most leaf-dense contiguous window)
+→ Leaf Detection (YOLOv11, weights/leaf_best.pt)
+→ Leaf Tracking (BoT-SORT + Global Motion Compensation, stable per-leaf IDs)
+→ Leaf Crop Extraction
+→ Normalization (224×224, ImageNet)
+→ Disease Classification (dedicated ResNet50 classifier, weights/leaf_classifier.pt)
+→ Temporal Aggregation (confidence-weighted vote per tracked leaf)
+→ Final per-leaf diagnosis  → persisted to SQLite  → Web Application
 ```
+
+There is **no separate plant-detection / plant-tracking stage** — the system is
+leaf-centric: the leaf detector localizes leaves directly, BoT-SORT tracks each
+leaf across frames, and one final result = one tracked leaf.
+
+> **Legacy note:** the `smart_leaf_detection/` package contains an older,
+> plant-then-leaf CLI pipeline (with hand-rolled ByteTrack-style trackers). It is
+> **not** used by the web application and is kept only for reference/experiments.
+> The production path is the flow above.
 
 ## Model Weights
 

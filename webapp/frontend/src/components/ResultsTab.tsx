@@ -71,11 +71,34 @@ export default function ResultsTab({ flight }: Props) {
       <div style={{ ...styles.card, marginTop:16 }}>
         <h3 style={{ margin:'0 0 12px', color:'var(--green-700)' }}>🔬 How Disease Was Inferred</h3>
         <div style={{ fontSize:13, color:'var(--gray-600)', lineHeight:1.7 }}>
-          <p>1. The YOLOv11 leaf detector located each leaf and tracked it across frames (ByteTrack, stable per-leaf IDs)</p>
+          <p>1. The YOLOv11 leaf detector located each leaf and tracked it across frames (BoT-SORT with Global Motion Compensation, stable per-leaf IDs)</p>
           <p>2. Each tracked leaf crop was normalized to 224×224 (ImageNet) and classified by the dedicated ResNet50 disease classifier</p>
           <p>3. Per-frame class probabilities were aggregated over each leaf's track (confidence-weighted majority vote)</p>
           <p>4. The aggregated label is the leaf's final disease prediction; one result card = one tracked leaf</p>
           <p>5. The YOLO model is used only for localization/tracking — the disease prediction comes entirely from the image classifier</p>
+        </div>
+      </div>
+
+      {/* Why fewer leaves than per-frame detections */}
+      <div style={{ ...styles.card, marginTop:16, background:'#f8fafc', border:'1px solid var(--gray-200)' }}>
+        <h3 style={{ margin:'0 0 12px', color:'var(--green-700)' }}>🍃 Why fewer leaves than detections?</h3>
+        <div style={{ fontSize:13, color:'var(--gray-600)', lineHeight:1.7 }}>
+          <p>
+            A single frame in the Investigation tab can show many leaf <em>detections</em> — but a
+            detection is just one leaf seen in one frame. The same physical leaf is detected again
+            and again across consecutive frames.
+          </p>
+          <p>
+            BoT-SORT links those repeated detections into <strong>one tracked leaf</strong> with a
+            stable ID. So a leaf appearing in 8 frames produces 8 detections but only{' '}
+            <strong>one</strong> result card here.
+          </p>
+          <p>
+            Each result is therefore <strong>one unique leaf</strong>, inspected from every frame it
+            appeared in — not one detection. A leaf must be seen in at least 2 frames to count, which
+            filters out one-frame false positives. That is why the final leaf count is smaller than
+            the number of per-frame detections.
+          </p>
         </div>
       </div>
 
