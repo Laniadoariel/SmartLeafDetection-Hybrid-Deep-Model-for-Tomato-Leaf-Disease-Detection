@@ -109,17 +109,22 @@ def flight_detail(
     for pr in flight.plant_results:
         leaves = [
             LeafResultResponse(
-                leaf_id=lr.leaf_id, label=lr.label, confidence=lr.confidence,
+                leaf_id=lr.leaf_id, frame_index=lr.frame_index or 0,
+                label=lr.label, confidence=lr.confidence,
                 bbox=[lr.bbox_x1, lr.bbox_y1, lr.bbox_x2, lr.bbox_y2],
                 crop_path=lr.crop_path,
             )
-            for lr in pr.leaf_results
+            for lr in sorted(pr.leaf_results, key=lambda x: x.frame_index or 0)
         ]
         labels = [l.strip() for l in (pr.disease_labels or "").split(",") if l.strip()]
         plants.append(PlantResultResponse(
             id=pr.id, plant_id=pr.plant_id, status=pr.status,
             disease_labels=labels, confidence=pr.confidence,
             leaf_count=pr.leaf_count, diseased_leaf_count=pr.diseased_leaf_count,
+            frames_seen=pr.views_total or 0,
+            views_total=pr.views_total or 0,
+            views_agreeing=pr.views_agreeing or 0,
+            weighted_decision=bool(pr.weighted_decision),
             gps_lat=pr.gps_lat, gps_lon=pr.gps_lon, leaves=leaves,
         ))
 
@@ -137,6 +142,9 @@ def flight_detail(
         status=flight.status, current_stage=flight.current_stage or "",
         progress=flight.progress or 0, total_frames=flight.total_frames or 0,
         processed_frames=flight.processed_frames or 0,
+        total_video_frames=flight.total_video_frames or 0,
+        relevant_frames=flight.relevant_frames or 0,
+        total_detections=flight.total_detections or 0,
         total_plants=flight.total_plants or 0,
         diseased_plants=flight.diseased_plants or 0,
         healthy_plants=flight.healthy_plants or 0,
@@ -164,6 +172,9 @@ def _to_summary(f: Flight) -> FlightSummary:
         id=f.id, video_filename=f.video_filename, status=f.status,
         current_stage=f.current_stage or "", progress=f.progress or 0,
         total_frames=f.total_frames or 0, processed_frames=f.processed_frames or 0,
+        total_video_frames=f.total_video_frames or 0,
+        relevant_frames=f.relevant_frames or 0,
+        total_detections=f.total_detections or 0,
         total_plants=f.total_plants or 0, diseased_plants=f.diseased_plants or 0,
         healthy_plants=f.healthy_plants or 0, created_at=f.created_at,
         completed_at=f.completed_at,

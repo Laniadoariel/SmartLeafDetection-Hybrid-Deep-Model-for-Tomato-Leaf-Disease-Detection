@@ -1,0 +1,22 @@
+{
+  "prepare": {
+    "at": "2026-06-22 20:43:40",
+    "data": "datasets/leaves_yolo/data.yaml"
+  },
+  "baseline": {
+    "at": "2026-06-22 22:51:18",
+    "weights": "weights/leaf_baseline.pt"
+  },
+  "improved": {
+    "at": "2026-06-22 21:10:52",
+    "weights": "weights/leaf_improved.pt"
+  },
+  "evaluate": {
+    "at": "2026-06-22 21:18:05",
+    "csv": "training/leaf_detection/reports/metrics_comparison.csv"
+  },
+  "summary": {
+    "at": "2026-06-22 21:18:05",
+    "summary": "training/leaf_detection/reports/comparison_summary.json"
+  }
+}

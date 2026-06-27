@@ -741,8 +741,9 @@ def main() -> None:
              "Must match --frames in order (e.g. --frames 1_original.jpeg --annotated 1.jpeg)",
     )
     parser.add_argument(
-        "--leaf-weights", default="yolo11_leaves.pt",
-        help="Path to trained YOLOv11 leaf-only detection weights",
+        "--leaf-weights", default="weights/leaf_best.pt",
+        help="Path to trained YOLOv11 leaf-only detection weights "
+             "(produced by training/leaf_detection/)",
     )
     parser.add_argument(
         "--classifier-weights", default=None,

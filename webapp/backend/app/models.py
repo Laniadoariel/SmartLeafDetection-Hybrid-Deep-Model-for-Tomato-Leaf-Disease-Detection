@@ -35,7 +35,10 @@ class Flight(Base):
     progress = Column(Float, default=0.0)
     total_frames = Column(Integer, default=0)
     processed_frames = Column(Integer, default=0)
-    total_plants = Column(Integer, default=0)
+    total_video_frames = Column(Integer, default=0)   # raw frames decoded from the video
+    relevant_frames = Column(Integer, default=0)       # frames where >=1 leaf was detected
+    total_detections = Column(Integer, default=0)      # total leaf observations classified
+    total_plants = Column(Integer, default=0)          # = number of tracked leaves
     diseased_plants = Column(Integer, default=0)
     healthy_plants = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -53,9 +56,16 @@ class PlantResult(Base):
     plant_id = Column(Integer, nullable=False)
     status = Column(String(20), nullable=False)  # healthy / diseased
     disease_labels = Column(Text, default="")  # comma-separated
-    confidence = Column(Float, default=0.0)
+    confidence = Column(Float, default=0.0)   # aggregated confidence of the winning class
     leaf_count = Column(Integer, default=0)
     diseased_leaf_count = Column(Integer, default=0)
+    # Temporal-aggregation transparency: how many views (frames) this tracked
+    # leaf was observed in, how many of them voted for the winning class, and
+    # whether the winner came from confidence-weighting rather than a plain
+    # view-count majority (count plurality != weighted winner).
+    views_total = Column(Integer, default=0)
+    views_agreeing = Column(Integer, default=0)
+    weighted_decision = Column(Integer, default=0)  # 0/1 boolean
     gps_lat = Column(Float, nullable=True)
     gps_lon = Column(Float, nullable=True)
     gps_alt = Column(Float, nullable=True)
@@ -69,6 +79,7 @@ class LeafResult(Base):
     id = Column(String(36), primary_key=True, default=_uuid)
     plant_result_id = Column(String(36), ForeignKey("plant_results.id"), nullable=False)
     leaf_id = Column(Integer, nullable=False)
+    frame_index = Column(Integer, default=0)   # which frame this observation came from
     label = Column(String(100), nullable=False)
     confidence = Column(Float, default=0.0)
     bbox_x1 = Column(Float, default=0)

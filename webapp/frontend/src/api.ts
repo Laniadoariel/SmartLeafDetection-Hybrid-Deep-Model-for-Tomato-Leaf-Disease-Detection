@@ -26,12 +26,13 @@ export interface FlightSummary {
   id: string; video_filename: string; status: string;
   current_stage: string; progress: number;
   total_frames: number; processed_frames: number;
+  total_video_frames: number; relevant_frames: number; total_detections: number;
   total_plants: number; diseased_plants: number; healthy_plants: number;
   created_at: string; completed_at: string | null;
 }
 
 export interface LeafResult {
-  leaf_id: number; label: string; confidence: number;
+  leaf_id: number; frame_index: number; label: string; confidence: number;
   bbox: number[]; crop_path: string | null;
 }
 
@@ -39,6 +40,8 @@ export interface PlantResult {
   id: string; plant_id: number; status: string;
   disease_labels: string[]; confidence: number;
   leaf_count: number; diseased_leaf_count: number;
+  frames_seen: number; views_total: number; views_agreeing: number;
+  weighted_decision: boolean;
   gps_lat: number | null; gps_lon: number | null;
   leaves: LeafResult[];
 }

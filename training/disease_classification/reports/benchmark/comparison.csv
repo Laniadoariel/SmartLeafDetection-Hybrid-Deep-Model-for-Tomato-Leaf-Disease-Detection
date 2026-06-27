@@ -1,0 +1,4 @@
+arch,accuracy,macro_precision,macro_recall,macro_f1,avg_inference_ms,num_params_millions,model_size_mb,selection_score
+resnet50,0.9424,0.8594,0.8956,0.8487,13.967,23.53,90.06,0.6293
+efficientnet_v2_s,0.9526,0.8896,0.9031,0.8613,31.765,20.19,77.85,0.6248
+mobilenet_v3_large,0.9295,0.835,0.8789,0.8256,13.311,4.22,16.27,0.4

@@ -1,0 +1,106 @@
+[
+  {
+    "flight_id": "static_frames",
+    "plant_id": 6,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.41478613018989563,
+      "leaf_count": 5.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 7,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.4450126588344574,
+      "leaf_count": 4.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 9,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.3946797847747803,
+      "leaf_count": 5.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 10,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.34357354044914246,
+      "leaf_count": 4.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 11,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.34934356808662415,
+      "leaf_count": 4.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 12,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.35971546173095703,
+      "leaf_count": 5.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 14,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.4344375729560852,
+      "leaf_count": 4.0,
+      "diseased_leaf_count": 1.0
+    }
+  },
+  {
+    "flight_id": "static_frames",
+    "plant_id": 15,
+    "gps": null,
+    "disease_labels": [
+      "Bacterial Spot"
+    ],
+    "evidence_metrics": {
+      "Bacterial Spot": 0.3626197874546051,
+      "leaf_count": 4.0,
+      "diseased_leaf_count": 1.0
+    }
+  }
+]

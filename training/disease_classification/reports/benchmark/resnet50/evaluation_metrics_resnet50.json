@@ -1,0 +1,214 @@
+{
+  "tag": "resnet50",
+  "arch": "resnet50",
+  "weights": "weights/benchmark/resnet50.pt",
+  "split": "test",
+  "device": "mps",
+  "num_params": 23530571,
+  "num_params_millions": 23.53,
+  "model_size_mb": 90.06,
+  "avg_inference_ms": 13.967,
+  "median_inference_ms": 13.916,
+  "timing_samples": 200,
+  "accuracy": 0.9424,
+  "macro_precision": 0.8594,
+  "macro_recall": 0.8956,
+  "macro_f1": 0.8487,
+  "per_class": {
+    "bacterial_spot": {
+      "precision": 0.967,
+      "recall": 0.967,
+      "f1": 0.967,
+      "support": 303
+    },
+    "black_spot": {
+      "precision": 0.8235,
+      "recall": 1.0,
+      "f1": 0.9032,
+      "support": 70
+    },
+    "early_blight": {
+      "precision": 0.9697,
+      "recall": 0.9664,
+      "f1": 0.9681,
+      "support": 596
+    },
+    "healthy": {
+      "precision": 0.9951,
+      "recall": 0.9927,
+      "f1": 0.9939,
+      "support": 410
+    },
+    "late_blight": {
+      "precision": 1.0,
+      "recall": 0.9577,
+      "f1": 0.9784,
+      "support": 497
+    },
+    "leaf_mold": {
+      "precision": 0.9552,
+      "recall": 0.9275,
+      "f1": 0.9412,
+      "support": 69
+    },
+    "mosaic_virus": {
+      "precision": 0.9512,
+      "recall": 0.8298,
+      "f1": 0.8864,
+      "support": 47
+    },
+    "powdery_mildew": {
+      "precision": 0.4364,
+      "recall": 1.0,
+      "f1": 0.6076,
+      "support": 24
+    },
+    "septoria_leaf_spot": {
+      "precision": 0.5341,
+      "recall": 0.9216,
+      "f1": 0.6763,
+      "support": 51
+    },
+    "target_spot": {
+      "precision": 0.8571,
+      "recall": 0.2892,
+      "f1": 0.4324,
+      "support": 83
+    },
+    "yellow_leaf_curl_virus": {
+      "precision": 0.9636,
+      "recall": 1.0,
+      "f1": 0.9815,
+      "support": 106
+    }
+  },
+  "failure_analysis": {
+    "bacterial_spot": {
+      "support": 303,
+      "most_confused_with": [
+        {
+          "class": "septoria_leaf_spot",
+          "count": 5,
+          "rate": 0.0165
+        },
+        {
+          "class": "early_blight",
+          "count": 2,
+          "rate": 0.0066
+        }
+      ]
+    },
+    "black_spot": {
+      "support": 70,
+      "most_confused_with": []
+    },
+    "early_blight": {
+      "support": 596,
+      "most_confused_with": [
+        {
+          "class": "black_spot",
+          "count": 10,
+          "rate": 0.0168
+        },
+        {
+          "class": "powdery_mildew",
+          "count": 4,
+          "rate": 0.0067
+        }
+      ]
+    },
+    "healthy": {
+      "support": 410,
+      "most_confused_with": [
+        {
+          "class": "yellow_leaf_curl_virus",
+          "count": 1,
+          "rate": 0.0024
+        },
+        {
+          "class": "mosaic_virus",
+          "count": 1,
+          "rate": 0.0024
+        }
+      ]
+    },
+    "late_blight": {
+      "support": 497,
+      "most_confused_with": [
+        {
+          "class": "early_blight",
+          "count": 15,
+          "rate": 0.0302
+        },
+        {
+          "class": "bacterial_spot",
+          "count": 4,
+          "rate": 0.008
+        }
+      ]
+    },
+    "leaf_mold": {
+      "support": 69,
+      "most_confused_with": [
+        {
+          "class": "black_spot",
+          "count": 2,
+          "rate": 0.029
+        },
+        {
+          "class": "mosaic_virus",
+          "count": 1,
+          "rate": 0.0145
+        }
+      ]
+    },
+    "mosaic_virus": {
+      "support": 47,
+      "most_confused_with": [
+        {
+          "class": "yellow_leaf_curl_virus",
+          "count": 3,
+          "rate": 0.0638
+        },
+        {
+          "class": "leaf_mold",
+          "count": 3,
+          "rate": 0.0638
+        }
+      ]
+    },
+    "powdery_mildew": {
+      "support": 24,
+      "most_confused_with": []
+    },
+    "septoria_leaf_spot": {
+      "support": 51,
+      "most_confused_with": [
+        {
+          "class": "target_spot",
+          "count": 4,
+          "rate": 0.0784
+        }
+      ]
+    },
+    "target_spot": {
+      "support": 83,
+      "most_confused_with": [
+        {
+          "class": "septoria_leaf_spot",
+          "count": 32,
+          "rate": 0.3855
+        },
+        {
+          "class": "powdery_mildew",
+          "count": 26,
+          "rate": 0.3133
+        }
+      ]
+    },
+    "yellow_leaf_curl_virus": {
+      "support": 106,
+      "most_confused_with": []
+    }
+  }
+}

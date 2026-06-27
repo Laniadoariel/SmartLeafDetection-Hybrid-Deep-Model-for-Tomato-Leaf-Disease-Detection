@@ -9,6 +9,11 @@ const DISEASE_COLORS: Record<string, string> = {
   'Tomato leaf bacterial spot': '#ef4444', 'Tomato leaf': '#22c55e',
   'Tomato mold leaf': '#a855f7', 'Tomato Septoria leaf spot': '#ec4899',
   'black spot': '#1f2937', Healthy: '#22c55e',
+  // Canonical classes emitted by the dedicated disease classifier (snake_case)
+  bacterial_spot: '#ef4444', early_blight: '#f97316', late_blight: '#dc2626',
+  leaf_mold: '#a855f7', septoria_leaf_spot: '#ec4899', target_spot: '#3b82f6',
+  spider_mites: '#0ea5e9', mosaic_virus: '#8b5cf6', yellow_leaf_curl_virus: '#eab308',
+  powdery_mildew: '#64748b', black_spot: '#1f2937',
 }
 
 export default function ResultsTab({ flight }: Props) {
@@ -37,7 +42,7 @@ export default function ResultsTab({ flight }: Props) {
     <div>
       {/* Summary cards */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:16, marginBottom:24 }}>
-        <SummaryCard label="Total Plants" value={flight.total_plants} icon="🌱" color="#16a34a" />
+        <SummaryCard label="Leaves Inspected" value={flight.total_plants} icon="🍃" color="#16a34a" />
         <SummaryCard label="Healthy" value={healthy.length} icon="✅" color="#22c55e" />
         <SummaryCard label="Diseased" value={diseased.length} icon="⚠️" color="#dc2626" />
         <SummaryCard label="Frames Analyzed" value={flight.total_frames} icon="🎞️" color="#6366f1" />
@@ -66,18 +71,18 @@ export default function ResultsTab({ flight }: Props) {
       <div style={{ ...styles.card, marginTop:16 }}>
         <h3 style={{ margin:'0 0 12px', color:'var(--green-700)' }}>🔬 How Disease Was Inferred</h3>
         <div style={{ fontSize:13, color:'var(--gray-600)', lineHeight:1.7 }}>
-          <p>1. Leaf detections were tracked across frames using ByteTrack IOU-based tracking</p>
-          <p>2. Each tracked leaf received disease probabilities from the ResNet50 / YOLO classifier</p>
-          <p>3. Probabilities were aggregated temporally using a sliding window buffer</p>
-          <p>4. Leaf-level labels were stabilized via dual-threshold (mean probability + majority vote)</p>
-          <p>5. Plant-level disease status was inferred from the leaf-level evidence</p>
+          <p>1. The YOLOv11 leaf detector located each leaf and tracked it across frames (ByteTrack, stable per-leaf IDs)</p>
+          <p>2. Each tracked leaf crop was normalized to 224×224 (ImageNet) and classified by the dedicated ResNet50 disease classifier</p>
+          <p>3. Per-frame class probabilities were aggregated over each leaf's track (confidence-weighted majority vote)</p>
+          <p>4. The aggregated label is the leaf's final disease prediction; one result card = one tracked leaf</p>
+          <p>5. The YOLO model is used only for localization/tracking — the disease prediction comes entirely from the image classifier</p>
         </div>
       </div>
 
-      {/* Plant cards */}
-      <h3 style={{ margin:'24px 0 12px' }}>Plant Results ({flight.plants.length})</h3>
+      {/* Leaf cards */}
+      <h3 style={{ margin:'24px 0 12px' }}>Leaf Results ({flight.plants.length})</h3>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))', gap:16 }}>
-        {flight.plants.map(p => <PlantCard key={p.id} plant={p} flightId={flight.id} />)}
+        {flight.plants.map(p => <LeafCard key={p.id} plant={p} />)}
       </div>
     </div>
   )
@@ -93,7 +98,7 @@ function SummaryCard({ label, value, icon, color }: { label:string; value:number
   )
 }
 
-function PlantCard({ plant, flightId }: { plant: PlantResult; flightId: string }) {
+function LeafCard({ plant }: { plant: PlantResult }) {
   const isDiseased = plant.status === 'diseased'
   return (
     <div style={{
@@ -101,7 +106,7 @@ function PlantCard({ plant, flightId }: { plant: PlantResult; flightId: string }
       borderLeft: `4px solid ${isDiseased ? '#dc2626' : '#22c55e'}`,
     }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <h4 style={{ margin:0 }}>Plant #{plant.plant_id}</h4>
+        <h4 style={{ margin:0 }}>Leaf #{plant.plant_id}</h4>
         <span style={{
           padding:'3px 10px', borderRadius:10, fontSize:11, fontWeight:600,
           background: isDiseased ? '#fef2f2' : '#f0fdf4',
@@ -120,10 +125,9 @@ function PlantCard({ plant, flightId }: { plant: PlantResult; flightId: string }
           ))}
         </div>
       )}
-      <div style={{ marginTop:10, fontSize:12, color:'var(--gray-500)', display:'flex', gap:16 }}>
+      <div style={{ marginTop:10, fontSize:12, color:'var(--gray-500)', display:'flex', gap:16, flexWrap:'wrap' }}>
         <span>Confidence: {(plant.confidence * 100).toFixed(0)}%</span>
-        <span>Leaves: {plant.leaf_count}</span>
-        {isDiseased && <span>Diseased: {plant.diseased_leaf_count}</span>}
+        {plant.views_total > 0 && <span>Seen in {plant.views_total} frame{plant.views_total > 1 ? 's' : ''}</span>}
       </div>
       {plant.gps_lat && (
         <div style={{ marginTop:6, fontSize:11, color:'var(--gray-400)' }}>
@@ -133,9 +137,9 @@ function PlantCard({ plant, flightId }: { plant: PlantResult; flightId: string }
       {/* Leaf crops */}
       {plant.leaves.length > 0 && (
         <div style={{ marginTop:10, display:'flex', gap:6, flexWrap:'wrap' }}>
-          {plant.leaves.slice(0, 4).map(l => (
+          {plant.leaves.slice(0, 4).map((l, i) => (
             l.crop_path && (
-              <img key={l.leaf_id}
+              <img key={i}
                 src={`/files/output/${l.crop_path}`}
                 alt={l.label}
                 style={{ width:60, height:60, objectFit:'cover', borderRadius:6, border:'1px solid var(--gray-200)' }}

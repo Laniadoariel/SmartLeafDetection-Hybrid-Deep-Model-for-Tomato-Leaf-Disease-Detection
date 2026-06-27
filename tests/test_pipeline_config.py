@@ -29,11 +29,13 @@ class TestDefaults:
         assert cfg.plant_confidence_threshold == 0.25
         assert cfg.bytetrack_config_path is None
         assert cfg.roi_padding == 0.1
-        assert cfg.leaf_weights_path == "yolo11_leaves.pt"
+        assert cfg.leaf_weights_path == "weights/leaf_best.pt"
         assert cfg.leaf_confidence_threshold == 0.25
         assert cfg.classifier_weights_path == "resnet50_tomato.pt"
         assert cfg.class_names == _DEFAULT_CLASS_NAMES
-        assert cfg.device == "cuda"
+        # Default is "auto" (resolves CUDA -> MPS -> CPU at runtime) so the
+        # same config is portable across macOS / Windows / Linux.
+        assert cfg.device == "auto"
         assert cfg.aggregation_window == 30
         assert cfg.aggregation_confidence_threshold == 0.6
         assert cfg.aggregation_majority_ratio == 0.6

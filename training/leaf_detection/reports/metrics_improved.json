@@ -1,0 +1,171 @@
+{
+  "tag": "improved",
+  "evaluated_at": "2026-06-25T18:09:28",
+  "weights": "/Users/zarfati/Projects/Technion/SmartLeafDetection/runs/leaves/leaf_improved/weights/best.pt",
+  "data": "/Users/zarfati/Projects/Technion/SmartLeafDetection/datasets/leaves_yolo/data.yaml",
+  "split": "test",
+  "imgsz": 960,
+  "iou": 0.6,
+  "conf_for_map": 0.001,
+  "metrics": {
+    "precision": 0.67778,
+    "recall": 0.81785,
+    "f1": 0.74125,
+    "mAP50": 0.78672,
+    "mAP50_95": 0.47586
+  },
+  "conf_sweep": [
+    {
+      "conf": 0.05,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.78305,
+      "mAP50_95": 0.47394
+    },
+    {
+      "conf": 0.1,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.77534,
+      "mAP50_95": 0.47112
+    },
+    {
+      "conf": 0.15,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.76585,
+      "mAP50_95": 0.46591
+    },
+    {
+      "conf": 0.2,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.75561,
+      "mAP50_95": 0.45936
+    },
+    {
+      "conf": 0.25,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.74994,
+      "mAP50_95": 0.45618
+    },
+    {
+      "conf": 0.3,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.74392,
+      "mAP50_95": 0.45126
+    },
+    {
+      "conf": 0.35,
+      "precision": 0.67778,
+      "recall": 0.81785,
+      "f1": 0.74125,
+      "mAP50": 0.72508,
+      "mAP50_95": 0.44038
+    },
+    {
+      "conf": 0.4,
+      "precision": 0.67644,
+      "recall": 0.81855,
+      "f1": 0.74074,
+      "mAP50": 0.69863,
+      "mAP50_95": 0.42746
+    },
+    {
+      "conf": 0.45,
+      "precision": 0.69975,
+      "recall": 0.77899,
+      "f1": 0.73725,
+      "mAP50": 0.67103,
+      "mAP50_95": 0.41194
+    },
+    {
+      "conf": 0.5,
+      "precision": 0.7264,
+      "recall": 0.72442,
+      "f1": 0.72541,
+      "mAP50": 0.6353,
+      "mAP50_95": 0.38967
+    },
+    {
+      "conf": 0.55,
+      "precision": 0.75349,
+      "recall": 0.66303,
+      "f1": 0.70537,
+      "mAP50": 0.59079,
+      "mAP50_95": 0.36287
+    },
+    {
+      "conf": 0.6,
+      "precision": 0.7931,
+      "recall": 0.59618,
+      "f1": 0.68069,
+      "mAP50": 0.5362,
+      "mAP50_95": 0.33216
+    },
+    {
+      "conf": 0.65,
+      "precision": 0.8234,
+      "recall": 0.50887,
+      "f1": 0.62901,
+      "mAP50": 0.46287,
+      "mAP50_95": 0.29006
+    },
+    {
+      "conf": 0.7,
+      "precision": 0.85799,
+      "recall": 0.39563,
+      "f1": 0.54155,
+      "mAP50": 0.36994,
+      "mAP50_95": 0.23404
+    },
+    {
+      "conf": 0.75,
+      "precision": 0.90732,
+      "recall": 0.25375,
+      "f1": 0.39659,
+      "mAP50": 0.24667,
+      "mAP50_95": 0.15589
+    },
+    {
+      "conf": 0.8,
+      "precision": 0.98876,
+      "recall": 0.12005,
+      "f1": 0.21411,
+      "mAP50": 0.12489,
+      "mAP50_95": 0.07997
+    },
+    {
+      "conf": 0.85,
+      "precision": 1.0,
+      "recall": 0.02456,
+      "f1": 0.04794,
+      "mAP50": 0.025,
+      "mAP50_95": 0.01548
+    },
+    {
+      "conf": 0.9,
+      "precision": 1.0,
+      "recall": 0.00409,
+      "f1": 0.00815,
+      "mAP50": 0.005,
+      "mAP50_95": 0.004
+    }
+  ],
+  "recommended_conf_by_f1": {
+    "conf": 0.05,
+    "precision": 0.67778,
+    "recall": 0.81785,
+    "f1": 0.74125,
+    "mAP50": 0.78305,
+    "mAP50_95": 0.47394
+  }
+}

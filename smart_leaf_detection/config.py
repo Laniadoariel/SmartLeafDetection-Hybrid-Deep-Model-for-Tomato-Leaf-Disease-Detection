@@ -50,13 +50,17 @@ class PipelineConfig:
     roi_padding: float = 0.1
 
     # Leaf detection
-    leaf_weights_path: str = "yolo11_leaves.pt"
+    # Trained leaf detector produced by training/leaf_detection/. Falls back to
+    # the legacy name if the new artifact is absent (see LeafDetector loading).
+    leaf_weights_path: str = "weights/leaf_best.pt"
     leaf_confidence_threshold: float = 0.25
 
     # Disease classification
     classifier_weights_path: str = "resnet50_tomato.pt"
     class_names: list[str] = field(default_factory=lambda: list(_DEFAULT_CLASS_NAMES))
-    device: str = "cuda"
+    # "auto" resolves to CUDA -> MPS (Apple Silicon) -> CPU at runtime so the
+    # same config works on Windows/Linux (NVIDIA) and macOS without edits.
+    device: str = "auto"
 
     # Temporal aggregation
     aggregation_window: int = 30

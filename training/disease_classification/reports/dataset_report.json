@@ -1,0 +1,115 @@
+{
+  "datasets_used": [
+    "tomato_diseases",
+    "merged_diseases",
+    "plantdoc",
+    "tomato_6k"
+  ],
+  "params": {
+    "padding": 0.08,
+    "min_size": 24,
+    "min_samples_per_class": 25,
+    "seed": 0,
+    "split_mode": "resplit",
+    "val_frac": 0.1,
+    "test_frac": 0.1
+  },
+  "total_crops": 18749,
+  "classes": [
+    "healthy",
+    "bacterial_spot",
+    "early_blight",
+    "late_blight",
+    "leaf_mold",
+    "septoria_leaf_spot",
+    "target_spot",
+    "mosaic_virus",
+    "yellow_leaf_curl_virus",
+    "powdery_mildew",
+    "black_spot"
+  ],
+  "per_split_counts": {
+    "train": {
+      "healthy": 3175,
+      "black_spot": 118,
+      "early_blight": 3668,
+      "leaf_mold": 528,
+      "late_blight": 3288,
+      "bacterial_spot": 2323,
+      "target_spot": 594,
+      "yellow_leaf_curl_virus": 515,
+      "septoria_leaf_spot": 361,
+      "mosaic_virus": 193,
+      "powdery_mildew": 195
+    },
+    "validation": {
+      "leaf_mold": 89,
+      "bacterial_spot": 308,
+      "black_spot": 18,
+      "early_blight": 452,
+      "late_blight": 422,
+      "target_spot": 74,
+      "healthy": 355,
+      "septoria_leaf_spot": 37,
+      "yellow_leaf_curl_virus": 100,
+      "mosaic_virus": 48,
+      "powdery_mildew": 20
+    },
+    "test": {
+      "black_spot": 62,
+      "healthy": 354,
+      "early_blight": 488,
+      "bacterial_spot": 285,
+      "late_blight": 426,
+      "target_spot": 67,
+      "leaf_mold": 37,
+      "yellow_leaf_curl_virus": 78,
+      "septoria_leaf_spot": 28,
+      "mosaic_virus": 19,
+      "powdery_mildew": 24
+    }
+  },
+  "per_class_total": {
+    "healthy": 3884,
+    "bacterial_spot": 2916,
+    "early_blight": 4608,
+    "late_blight": 4136,
+    "leaf_mold": 654,
+    "septoria_leaf_spot": 426,
+    "target_spot": 735,
+    "mosaic_virus": 260,
+    "yellow_leaf_curl_virus": 693,
+    "powdery_mildew": 239,
+    "black_spot": 198
+  },
+  "class_imbalance_ratio": 23.27,
+  "dropped_classes_below_threshold": [
+    "spider_mites"
+  ],
+  "discarded": {
+    "too_small": 2942,
+    "ignored_class": 5912,
+    "image_not_found": 2
+  },
+  "problem_files": [
+    {
+      "dataset": "tomato_6k",
+      "label_file": "classes.txt",
+      "image_stem": "classes",
+      "reason": "image_not_found"
+    },
+    {
+      "dataset": "tomato_6k",
+      "label_file": "classes.txt",
+      "image_stem": "classes",
+      "reason": "image_not_found"
+    }
+  ],
+  "unmapped_labels": {},
+  "avg_crop_size": {
+    "width": 339.0,
+    "height": 359.3
+  },
+  "leakage_policy": "source image assigned to ONE split (mode=resplit); fixed seeded 80%/10%/10% source-level split \u2014 test never shares an image with train",
+  "output_root": "/Users/zarfati/Projects/Technion/SmartLeafDetection/datasets/leaf_clf"
+}

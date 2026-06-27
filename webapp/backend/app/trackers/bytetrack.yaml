@@ -1,0 +1,17 @@
+# ByteTrack tracker for SmartLeafDetection leaf tracking (FALLBACK option).
+#
+# This is the previous/baseline tracker. It has NO global motion compensation,
+# so on moving-camera (drone) footage it tends to drop and re-create track IDs
+# for the same leaf. Kept as a configurable fallback (LEAF_TRACKER=bytetrack)
+# and as the baseline for the BoT-SORT comparison.
+#
+# Schema mirrors the installed Ultralytics tracker config (8.4.x).
+
+tracker_type: bytetrack      # (str) ByteTrack backend
+
+track_high_thresh: 0.25      # (float) first-stage match threshold
+track_low_thresh: 0.1        # (float) second-stage threshold for low-score matches
+new_track_thresh: 0.25       # (float) start a new track if no match >= this
+track_buffer: 30             # (int) frames to keep lost tracks alive
+match_thresh: 0.8            # (float) association similarity threshold
+fuse_score: True             # (bool) fuse detection score with motion/IoU

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -38,11 +39,14 @@ class FlightSummary(BaseModel):
     progress: float
     total_frames: int
     processed_frames: int
+    total_video_frames: int = 0
+    relevant_frames: int = 0
+    total_detections: int = 0
     total_plants: int
     diseased_plants: int
     healthy_plants: int
     created_at: datetime
-    completed_at: datetime | None = None
+    completed_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -50,10 +54,11 @@ class FlightSummary(BaseModel):
 
 class LeafResultResponse(BaseModel):
     leaf_id: int
+    frame_index: int = 0
     label: str
     confidence: float
     bbox: list[float]
-    crop_path: str | None = None
+    crop_path: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -67,8 +72,12 @@ class PlantResultResponse(BaseModel):
     confidence: float
     leaf_count: int
     diseased_leaf_count: int
-    gps_lat: float | None = None
-    gps_lon: float | None = None
+    frames_seen: int = 0
+    views_total: int = 0
+    views_agreeing: int = 0
+    weighted_decision: bool = False
+    gps_lat: Optional[float] = None
+    gps_lon: Optional[float] = None
     leaves: list[LeafResultResponse] = []
 
     class Config:
@@ -78,7 +87,7 @@ class PlantResultResponse(BaseModel):
 class FrameResponse(BaseModel):
     frame_index: int
     original_path: str
-    annotated_path: str | None = None
+    annotated_path: Optional[str] = None
     plant_count: int
     leaf_count: int
 
@@ -94,12 +103,15 @@ class FlightDetailResponse(BaseModel):
     progress: float
     total_frames: int
     processed_frames: int
+    total_video_frames: int = 0
+    relevant_frames: int = 0
+    total_detections: int = 0
     total_plants: int
     diseased_plants: int
     healthy_plants: int
     created_at: datetime
-    completed_at: datetime | None = None
-    error_message: str | None = None
+    completed_at: Optional[datetime] = None
+    error_message: Optional[str] = None
     plants: list[PlantResultResponse] = []
     frames: list[FrameResponse] = []
 

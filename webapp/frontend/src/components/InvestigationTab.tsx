@@ -5,8 +5,8 @@ interface Props { flight: FlightDetail | null }
 
 const EXPLANATIONS: Record<string, string> = {
   original: 'Raw frame extracted from the uploaded drone video. Each frame captures a section of the tomato field from above.',
-  annotated: 'YOLOv11 disease detection model processes each frame, drawing bounding boxes around detected leaves with disease class labels and confidence scores.',
-  pipeline: 'The full pipeline: Frame → Plant Detection (YOLOv11) → Plant Tracking (ByteTrack IOU) → ROI Cropping → Leaf Detection (YOLOv11) → Leaf Tracking → Normalization (224×224, ImageNet) → Disease Classification (ResNet50) → Temporal Aggregation → Plant Status Inference',
+  annotated: 'The YOLOv11 leaf detector locates and tracks each individual leaf (stable per-leaf IDs via ByteTrack). Every tracked leaf crop is then passed to a dedicated ResNet50 disease classifier; boxes are drawn with the predicted disease class and confidence.',
+  pipeline: 'Actual pipeline: Frame → Leaf Detection (YOLOv11) → Leaf Tracking (ByteTrack) → Leaf Crop Extraction → Normalization (224×224, ImageNet) → Disease Classification (dedicated ResNet50 classifier) → Temporal Aggregation per tracked leaf → Final disease prediction. The YOLO model only localizes/tracks leaves; the disease prediction comes from the ResNet50 classifier.',
 }
 
 export default function InvestigationTab({ flight }: Props) {
@@ -47,11 +47,12 @@ export default function InvestigationTab({ flight }: Props) {
             </div>
           </div>
           <img src={imgSrc} alt={`Frame ${frame.frame_index}`}
-            style={{ width:'100%', borderRadius:8, background:'var(--gray-100)' }}
+            style={{ display:'block', margin:'0 auto', maxHeight:'70vh', maxWidth:'100%',
+                     objectFit:'contain', borderRadius:8, background:'var(--gray-100)' }}
             onError={e => { (e.target as HTMLImageElement).src = '' }} />
           <div style={{ display:'flex', gap:16, marginTop:12, fontSize:13, color:'var(--gray-500)' }}>
-            <span>🌱 {frame.plant_count} plants</span>
-            <span>🍃 {frame.leaf_count} leaves</span>
+            <span>🍃 {frame.leaf_count} leaf detections</span>
+            <span>🪴 {frame.plant_count} tracked leaves</span>
           </div>
         </div>
 
@@ -88,7 +89,7 @@ export default function InvestigationTab({ flight }: Props) {
             <p style={styles.explainText}>{EXPLANATIONS.original}</p>
           </div>
           <div style={styles.explainSection}>
-            <h5 style={styles.explainTitle}>Disease Detection</h5>
+            <h5 style={styles.explainTitle}>Leaf Detection + Disease Classification</h5>
             <p style={styles.explainText}>{EXPLANATIONS.annotated}</p>
           </div>
           <div style={styles.explainSection}>
@@ -109,7 +110,7 @@ export default function InvestigationTab({ flight }: Props) {
             <span>Current Frame</span><span style={{ fontWeight:600 }}>#{frame.frame_index}</span>
           </div>
           <div style={styles.stat}>
-            <span>Detections</span><span style={{ fontWeight:600 }}>{frame.plant_count}</span>
+            <span>Leaves in frame</span><span style={{ fontWeight:600 }}>{frame.leaf_count}</span>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import models
 
+from smart_leaf_detection.device_utils import resolve_torch_device
 from smart_leaf_detection.errors import ModelLoadError
 from smart_leaf_detection.models import ClassificationResult
 
@@ -31,14 +32,14 @@ class DiseaseClassifier:
         self,
         weights_path: str | None,
         class_names: list[str],
-        device: str = "cuda",
+        device: str = "auto",
     ) -> None:
         self.class_names = class_names
 
-        # Resolve device with cuda → cpu fallback
-        if device == "cuda" and not torch.cuda.is_available():
-            device = "cpu"
-        self.device = torch.device(device)
+        # Resolve the compute device for the current machine. "auto" picks
+        # CUDA -> MPS (Apple Silicon) -> CPU; an explicit backend that is not
+        # available degrades to CPU so the same call works on Mac and Windows.
+        self.device = torch.device(resolve_torch_device(device))
 
         # Build ResNet50 with custom head
         model = models.resnet50(weights=None)

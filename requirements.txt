@@ -1,8 +1,31 @@
-ultralytics
-opencv-python
-torch
-torchvision
-numpy
-hypothesis
-pytest
-pyyaml
+# SmartLeafDetection — core ML pipeline + training dependencies
+# ---------------------------------------------------------------------------
+# Cross-platform: these install on macOS (Apple Silicon / Intel), Windows, and
+# Linux. The compute backend is auto-selected at runtime (CUDA -> MPS -> CPU)
+# by smart_leaf_detection/device_utils.py, so no per-OS code changes are needed.
+#
+# Validated with: Python 3.10–3.12, ultralytics 8.4.24, torch 2.10.0.
+# The web backend has its own pinned deps in webapp/backend/requirements.txt.
+#
+# IMPORTANT — installing PyTorch:
+#   `pip install torch torchvision` gives a CPU build on Windows/Linux. For an
+#   NVIDIA GPU (CUDA) build, use the official selector at
+#   https://pytorch.org/get-started/locally/  e.g. (CUDA 12.1):
+#     pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   On macOS, the default wheel already includes Apple-Silicon (MPS) support.
+# ---------------------------------------------------------------------------
+
+# --- Deep learning / detection ---
+ultralytics>=8.3.0,<9        # YOLOv11 detector/tracker (validated: 8.4.24)
+torch>=2.2                   # see PyTorch note above (validated: 2.10.0)
+torchvision>=0.17            # ResNet50 backbone + transforms
+
+# --- Computer vision / numerics ---
+opencv-python>=4.9           # frame I/O, drawing, HSV/segmentation
+numpy>=1.26                  # array math (compatible with torch + opencv)
+pyyaml>=6.0                  # data.yaml / config parsing
+matplotlib>=3.7             # training curves, confusion matrix, dataset plots
+
+# --- Testing ---
+pytest>=8.0
+hypothesis>=6.100

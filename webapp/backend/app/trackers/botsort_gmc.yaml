@@ -1,0 +1,37 @@
+# BoT-SORT (with GMC) tracker for SmartLeafDetection leaf tracking.
+#
+# Why BoT-SORT here: drone footage has a constantly MOVING camera, which is the
+# main reason ByteTrack keeps assigning a fresh ID to the same physical leaf
+# every frame. BoT-SORT adds Global Motion Compensation (GMC), which estimates
+# the camera's frame-to-frame motion and compensates for it before associating
+# detections — so the same leaf keeps its track ID across more frames.
+#
+# Schema mirrors the installed Ultralytics tracker config (8.4.x). Tuned values
+# vs. the stock defaults are flagged with "[tuned]".
+
+tracker_type: botsort        # (str) BoT-SORT backend
+
+track_high_thresh: 0.25      # (float) first-stage match threshold
+track_low_thresh: 0.1        # (float) second-stage threshold for low-score matches
+new_track_thresh: 0.25       # (float) start a new track if no match >= this
+track_buffer: 60             # (int) [tuned] keep lost leaves alive longer (was 30).
+                             #       At FRAME_STRIDE_SEC=0.3 a leaf often vanishes
+                             #       briefly behind another leaf or off-frame and
+                             #       reappears; a larger buffer lets it KEEP its ID
+                             #       instead of becoming a new singleton track.
+match_thresh: 0.8            # (float) association similarity threshold
+fuse_score: True             # (bool) fuse detection score with motion/IoU
+
+# --- BoT-SORT specifics ---
+gmc_method: sparseOptFlow    # (str) Global Motion Compensation for the moving
+                             #       drone camera. sparseOptFlow is the cheap,
+                             #       dependency-free choice (uses OpenCV only).
+
+# --- ReID (appearance) association ---
+# Left OFF by default: GMC alone is the primary, low-cost win the task asks for,
+# and ReID adds compute. Flip with_reid to True to also match leaves by
+# appearance (model: auto reuses the detector's features when available).
+proximity_thresh: 0.5        # (float) min IoU to consider tracks proximate for ReID
+appearance_thresh: 0.8       # (float) min appearance similarity for ReID
+with_reid: False             # (bool) enable ReID model use
+model: auto                  # (str) ReID model; "auto" uses detector features if available

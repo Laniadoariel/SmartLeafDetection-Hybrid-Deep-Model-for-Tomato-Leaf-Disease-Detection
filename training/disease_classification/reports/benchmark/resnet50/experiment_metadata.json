@@ -1,0 +1,169 @@
+{
+  "experiment": {
+    "arch": "resnet50",
+    "created_at": "2026-06-27T03:29:36",
+    "selection_criterion": "validation_macro_f1"
+  },
+  "seed": 0,
+  "deterministic": "best_effort (cudnn deterministic; MPS not fully guaranteed)",
+  "config": {
+    "data": "datasets/leaf_clf",
+    "arch": "resnet50",
+    "epochs": 18,
+    "freeze_epochs": 3,
+    "batch": 32,
+    "img_size": 224,
+    "lr": 0.001,
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.05,
+    "patience": 6,
+    "blur_prob": 0.2,
+    "noise_prob": 0.2,
+    "noise_std": 0.02,
+    "mixup": 0.0,
+    "cutmix": 0.0,
+    "workers": 4,
+    "device": "mps",
+    "seed": 0,
+    "out": "weights/benchmark/resnet50.pt",
+    "reports_dir": "/Users/zarfati/Projects/Technion/SmartLeafDetection/training/disease_classification/reports/benchmark/resnet50"
+  },
+  "augmentation": {
+    "random_resized_crop": {
+      "size": 224,
+      "scale": [
+        0.7,
+        1.0
+      ],
+      "ratio": [
+        0.85,
+        1.18
+      ]
+    },
+    "horizontal_flip_p": 0.5,
+    "vertical_flip_p": 0.5,
+    "rotation_degrees": 25,
+    "color_jitter": {
+      "brightness": 0.25,
+      "contrast": 0.25,
+      "saturation": 0.2,
+      "hue": 0.05
+    },
+    "random_autocontrast_p": 0.2,
+    "gaussian_blur": {
+      "p": 0.2,
+      "kernel": 3,
+      "sigma": [
+        0.1,
+        1.5
+      ]
+    },
+    "gaussian_noise": {
+      "p": 0.2,
+      "std": 0.02
+    },
+    "normalize": {
+      "mean": [
+        0.485,
+        0.456,
+        0.406
+      ],
+      "std": [
+        0.229,
+        0.224,
+        0.225
+      ]
+    },
+    "mixup_cutmix": "off by default (see --mixup/--cutmix); local symptoms can be distorted by image mixing, so enable only if it raises val Macro-F1",
+    "eval": "Resize(1.15x) -> CenterCrop -> Normalize (no augmentation)",
+    "mixup_alpha": 0.0,
+    "cutmix_alpha": 0.0
+  },
+  "optimizer": {
+    "type": "AdamW",
+    "lr_head_warmup": 0.001,
+    "lr_after_unfreeze": 0.0001,
+    "weight_decay": 0.0001
+  },
+  "scheduler": {
+    "type": "CosineAnnealingLR",
+    "T_max_phase1": 18,
+    "T_max_phase2": 15
+  },
+  "loss": {
+    "type": "CrossEntropyLoss",
+    "label_smoothing": 0.05,
+    "class_weighted": true,
+    "class_weights": {
+      "bacterial_spot": 0.5825,
+      "black_spot": 6.8389,
+      "early_blight": 0.3825,
+      "healthy": 0.434,
+      "late_blight": 0.4283,
+      "leaf_mold": 2.1917,
+      "mosaic_virus": 7.2568,
+      "powdery_mildew": 11.2606,
+      "septoria_leaf_spot": 3.9344,
+      "target_spot": 1.8822,
+      "yellow_leaf_curl_virus": 2.4056
+    }
+  },
+  "model": {
+    "arch": "resnet50",
+    "img_size": 224,
+    "num_classes": 11,
+    "pretrained": true,
+    "head_modules": [
+      "fc"
+    ]
+  },
+  "dataset": {
+    "root": "/Users/zarfati/Projects/Technion/SmartLeafDetection/datasets/leaf_clf",
+    "classes": [
+      "bacterial_spot",
+      "black_spot",
+      "early_blight",
+      "healthy",
+      "late_blight",
+      "leaf_mold",
+      "mosaic_virus",
+      "powdery_mildew",
+      "septoria_leaf_spot",
+      "target_spot",
+      "yellow_leaf_curl_virus"
+    ],
+    "train_total": 28737,
+    "val_total": 4920,
+    "train_per_class": {
+      "bacterial_spot": 4485,
+      "black_spot": 382,
+      "early_blight": 6830,
+      "healthy": 6019,
+      "late_blight": 6099,
+      "leaf_mold": 1192,
+      "mosaic_virus": 360,
+      "powdery_mildew": 232,
+      "septoria_leaf_spot": 664,
+      "target_spot": 1388,
+      "yellow_leaf_curl_virus": 1086
+    },
+    "val_per_class": {
+      "bacterial_spot": 594,
+      "black_spot": 34,
+      "early_blight": 1526,
+      "healthy": 778,
+      "late_blight": 1426,
+      "leaf_mold": 133,
+      "mosaic_virus": 48,
+      "powdery_mildew": 46,
+      "septoria_leaf_spot": 41,
+      "target_spot": 194,
+      "yellow_leaf_curl_virus": 100
+    }
+  },
+  "result": {
+    "best_val_macro_f1": 0.8202271933388148,
+    "best_val_accuracy": 0.9540650406504065,
+    "best_epoch": 17
+  }
+}

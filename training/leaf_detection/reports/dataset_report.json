@@ -1,0 +1,81 @@
+{
+  "generated_at": "2026-06-22T20:43:40",
+  "inputs": {
+    "images_dir": "/Users/zarfati/Projects/Technion/SmartLeafDetection/cvat_frames_000000_000905",
+    "labels_dir": "/Users/zarfati/Projects/Technion/SmartLeafDetection/leaf_labels/labels/train",
+    "num_images": 906,
+    "num_label_files": 854,
+    "num_unlabeled_images": 52,
+    "num_orphan_labels": 0,
+    "orphan_labels_sample": [],
+    "unlabeled_images_sample": [
+      "frame_000643",
+      "frame_000644",
+      "frame_000645",
+      "frame_000646",
+      "frame_000647",
+      "frame_000648",
+      "frame_000649",
+      "frame_000650",
+      "frame_000651",
+      "frame_000652",
+      "frame_000653",
+      "frame_000654",
+      "frame_000655",
+      "frame_000656",
+      "frame_000657",
+      "frame_000658",
+      "frame_000659",
+      "frame_000660",
+      "frame_000661",
+      "frame_000662"
+    ]
+  },
+  "label_cleaning": {
+    "files_seen": 854,
+    "files_with_boxes": 854,
+    "empty_after_clean": 0,
+    "total_boxes_raw": 6049,
+    "total_boxes_kept": 6049,
+    "lines_with_trackid_fixed": 6025,
+    "boxes_dropped_bad_class": 0,
+    "boxes_dropped_degenerate": 0,
+    "boxes_dropped_malformed": 0,
+    "boxes_clamped_to_unit_range": 0,
+    "tiny_boxes_lt_0.1pct_area": 0,
+    "boxes_per_image": {
+      "min": 1,
+      "max": 17,
+      "mean": 7.083
+    }
+  },
+  "split": {
+    "strategy": "grouped temporal block split (anti-leakage)",
+    "block_size": 20,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15,
+    "counts": {
+      "train": 614,
+      "val": 120,
+      "test": 120
+    },
+    "boxes": {
+      "train": 4341,
+      "val": 975,
+      "test": 733
+    },
+    "include_unlabeled_as_background": false
+  },
+  "assumptions": [
+    "Class 0 == 'leaf'; any other class index is dropped.",
+    "A 6th column in a raw label line is a CVAT track id and is removed.",
+    "Coordinates are normalized; values outside [0,1] are clamped.",
+    "Boxes with non-positive width/height are dropped.",
+    "Adjacent video frames are near-duplicates, so splitting is done by contiguous frame blocks to avoid train/test leakage.",
+    "By default unlabeled frames are excluded (no negative/background supervision); pass --include-unlabeled to keep them as background."
+  ],
+  "output": {
+    "dataset_dir": "/Users/zarfati/Projects/Technion/SmartLeafDetection/datasets/leaves_yolo",
+    "data_yaml": "/Users/zarfati/Projects/Technion/SmartLeafDetection/datasets/leaves_yolo/data.yaml"
+  }
+}
