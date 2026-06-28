@@ -4,7 +4,6 @@ import type { FlightDetail, FlightSummary } from '../api'
 
 const STAGES = [
   'Video uploaded', 'Video decoded', 'Frames extracted',
-  'Plant detection started', 'Plant tracking started', 'Plant ROI cropping',
   'Leaf detection started', 'Leaf tracking started', 'Leaf ROI extraction',
   'Disease classification', 'Temporal aggregation', 'Plant-level inference',
   'Results saved', 'Analysis completed',

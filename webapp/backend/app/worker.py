@@ -387,8 +387,8 @@ def _run_pipeline(flight_id: str) -> None:
     total_video_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     # Sampling stride. Denser sampling keeps the same leaf visible across
     # consecutive sampled frames so the tracker can follow it. Configurable via
-    # FRAME_STRIDE_SEC (default 1s; lower = better tracking, more compute).
-    stride_sec = float(os.getenv("FRAME_STRIDE_SEC", "1.0"))
+    # FRAME_STRIDE_SEC (default 0.7s; lower = better tracking, more compute).
+    stride_sec = float(os.getenv("FRAME_STRIDE_SEC", "0.7"))
     step = max(1, int(fps * stride_sec))
 
     extracted_frames: list[tuple[int, str]] = []
@@ -488,7 +488,7 @@ def _run_pipeline(flight_id: str) -> None:
         detections = []  # each: {"bbox", "label", "conf", "leaf_id"}
 
         if track_model is not None:
-            # --- Leaf-centric tracking: follow each leaf across frames with a
+            # --- Leaf-centric tracking: follow each leaf across frames with agit 
             #     stable leaf ID; disease model classifies each leaf crop ---
             tres = track_model.track(frame, conf=LEAF_CONF, persist=True,
                                      tracker=LEAF_TRACKER_CFG, verbose=False)
@@ -622,7 +622,7 @@ def _run_pipeline(flight_id: str) -> None:
     # Keep leaves that were actually tracked across several frames (drops
     # one-frame flukes / untracked detections). Falls back to keeping all if
     # this filter would remove everything.
-    min_track_len = int(os.getenv("MIN_TRACK_LEN", "2"))
+    min_track_len = int(os.getenv("MIN_TRACK_LEN", "1"))
     leaves = {lid: dl for lid, dl in all_plant_detections.items() if dl}
     tracked = {lid: dl for lid, dl in leaves.items() if len(dl) >= min_track_len}
     if not tracked:
