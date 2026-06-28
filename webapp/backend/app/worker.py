@@ -488,7 +488,7 @@ def _run_pipeline(flight_id: str) -> None:
         detections = []  # each: {"bbox", "label", "conf", "leaf_id"}
 
         if track_model is not None:
-            # --- Leaf-centric tracking: follow each leaf across frames with agit 
+            # --- Leaf-centric tracking: follow each leaf across frames with a
             #     stable leaf ID; disease model classifies each leaf crop ---
             tres = track_model.track(frame, conf=LEAF_CONF, persist=True,
                                      tracker=LEAF_TRACKER_CFG, verbose=False)
