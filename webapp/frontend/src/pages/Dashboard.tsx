@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { HelpCircle } from 'lucide-react'
 import UploadTab from '../components/UploadTab'
 import InvestigationTab from '../components/InvestigationTab'
 import ResultsTab from '../components/ResultsTab'
 import HistoryTab from '../components/HistoryTab'
+import HelpModal from '../components/HelpModal'
 import type { FlightDetail } from '../api'
 
 const TABS = ['Upload', 'Investigation', 'Results', 'History'] as const
@@ -11,6 +13,7 @@ const TABS = ['Upload', 'Investigation', 'Results', 'History'] as const
 export default function Dashboard() {
   const [tab, setTab] = useState<number>(0)
   const [activeFlight, setActiveFlight] = useState<FlightDetail | null>(null)
+  const [helpOpen, setHelpOpen] = useState(false)
   const nav = useNavigate()
 
   const logout = () => {
@@ -41,9 +44,15 @@ export default function Dashboard() {
           <span style={{ fontSize:13, color:'var(--gray-500)' }}>
             {localStorage.getItem('username')}
           </span>
+          <button onClick={() => setHelpOpen(true)} style={styles.helpBtn} aria-label="Open help and user guide">
+            <HelpCircle size={16} />
+            <span>Help</span>
+          </button>
           <button onClick={logout} style={styles.logoutBtn}>Logout</button>
         </div>
       </header>
+
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
 
       {/* Tab bar */}
       <nav style={styles.tabBar}>
@@ -71,6 +80,11 @@ const styles: Record<string, React.CSSProperties> = {
     display:'flex', justifyContent:'space-between', alignItems:'center',
     padding:'12px 24px', background:'#fff', borderBottom:'1px solid var(--gray-200)',
     boxShadow:'0 1px 2px rgba(0,0,0,.04)',
+  },
+  helpBtn: {
+    display:'flex', alignItems:'center', gap:6,
+    padding:'6px 14px', background:'var(--green-50)', color:'var(--green-700)',
+    fontSize:13, fontWeight:500, borderRadius:6,
   },
   logoutBtn: {
     padding:'6px 14px', background:'var(--gray-100)', color:'var(--gray-600)',
