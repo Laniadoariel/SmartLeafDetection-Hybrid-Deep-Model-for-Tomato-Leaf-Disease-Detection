@@ -27,6 +27,10 @@ yolo11s.pt
 training_log.txt
 training_stable_log.txt
 
+# Generated frame outputs from the legacy CLI (regenerable; not used by the webapp)
+video_frames/
+best_leaf_frames/
+
 # Generated outputs (keep test samples)
 output/1_original*.jpeg
 output/2_original*.jpeg
