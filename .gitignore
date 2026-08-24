@@ -47,6 +47,9 @@ disease_report.json
 
 # PDFs
 *.pdf
+# ...but DO keep the academic project deliverables (Phase A / Phase B)
+!FinalProjectPhaseA/*.pdf
+!FinalProjectPhaseB/*.pdf
 
 # macOS
 .DS_Store
