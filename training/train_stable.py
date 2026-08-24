@@ -99,7 +99,7 @@ def main() -> None:
         print(f"Validation failed (non-critical): {e}")
         print("The trained weights are still valid and usable.")
 
-    print(f"\nTo test: python run_on_frames.py --frames test1.jpg test2.jpg test3.jpg "
+    print(f"\nTo test: python run_on_frames.py --frames samples/test1.jpg samples/test2.jpg samples/test3.jpg "
           f"--disease-weights {use_weights} --confidence 0.4")
     print("=" * 60)
 
