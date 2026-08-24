@@ -12,6 +12,7 @@ PlantDoc.v1-resize-416x416.yolov11/
 PlantDoc.v1-resize-416x416.yolov11.zip
 task_2114473_annotations_2026_03_25_20_00_47_cvat for images 1.1/
 task_2114473_annotations_2026_03_25_20_00_47_cvat for images 1.1.zip
+cvat_frames_*.zip
 
 # Training runs and model weights (too large for GitHub)
 runs/

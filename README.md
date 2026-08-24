@@ -173,8 +173,8 @@ SmartLeafDetection/
 >
 > **Deliverables:** academic deliverables live under `FinalProjectPhaseA/`
 > (project book A + Semester-1 presentation) and `FinalProjectPhaseB/`
-> (project book Phase B + poster). The legacy `demo.html` was moved to
-> `archive/unused/` because it documents an older pipeline the app no longer runs.
+> (project book Phase B + poster). The legacy `demo.html` was removed
+> because it documented an older pipeline the app no longer runs.
 
 ## Pipeline Flow
 
