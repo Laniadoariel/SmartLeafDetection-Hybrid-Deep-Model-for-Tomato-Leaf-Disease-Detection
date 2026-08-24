@@ -160,13 +160,21 @@ SmartLeafDetection/
 │       ├── evaluate_classifier.py      # test metrics + YOLO comparison
 │       └── run_benchmark.py            # ResNet50 / EfficientNetV2-S / MobileNetV3 benchmark
 ├── tests/                      # Test suite (covers the legacy library + config)
+├── FinalProjectPhaseA/         # Phase A deliverables (project book, presentation)
+├── FinalProjectPhaseB/         # Phase B deliverables (project book, poster)
+├── archive/unused/             # unreferenced files kept for review (see its README)
 ├── requirements.txt            # Python dependencies
-└── demo.html                   # (!) legacy static demo (describes the old pipeline)
+└── README.md
 ```
 
 > `*` = production path. The `smart_leaf_detection/` package is a legacy CLI
 > library kept for reference; only `leaf_disease_classifier.py` and
 > `device_utils.py` from it are imported by the web application.
+>
+> **Deliverables:** academic deliverables live under `FinalProjectPhaseA/`
+> (project book A + Semester-1 presentation) and `FinalProjectPhaseB/`
+> (project book Phase B + poster). The legacy `demo.html` was moved to
+> `archive/unused/` because it documents an older pipeline the app no longer runs.
 
 ## Pipeline Flow
 
