@@ -50,6 +50,9 @@ disease_report.json
 *.mov
 *.avi
 *.mkv
+# ...but DO keep the Phase A/B deliverable videos
+!FinalProjectPhaseA/*.mp4
+!FinalProjectPhaseB/*.mp4
 
 # PDFs
 *.pdf
